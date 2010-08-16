@@ -1,0 +1,10 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/autotools.mk
+
+makebuilddir/maemo-sharing-twitpic:: configure
+
+configure: configure.ac Makefile.am src/Makefile.am data/Makefile.am
+	./autogen.sh

@@ -1,0 +1,14 @@
+Source: maemo-sharing-twitpic
+Section: user/multimedia
+Priority: optional
+Maintainer: Alberto Garcia <agarcia@igalia.com>
+Build-Depends: debhelper (>= 5.0.0), cdbs, libhildon1-dev, libconic0-dev, libosso-dev, libsharing-plugin-dev
+Standards-Version: 3.8.0
+
+Package: maemo-sharing-twitpic
+Section: user/multimedia
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, sharing-manager
+Description: Twitpic sharing plugin for Maemo
+ This plugin allows you to upload pictures to Twitter using the
+ Twitpic service.
