@@ -20,6 +20,10 @@ PKG_CHECK_MODULES(libhildon, hildon-1)
 EXTRA_CFLAGS="$EXTRA_CFLAGS $libhildon_CFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $libhildon_LIBS"
 
+PKG_CHECK_MODULES(libhildonmime, libhildonmime)
+EXTRA_CFLAGS="$EXTRA_CFLAGS $libhildonmime_CFLAGS"
+EXTRA_LIBS="$EXTRA_LIBS $libhildonmime_LIBS"
+
 PKG_CHECK_MODULES(libsharing, libsharing)
 EXTRA_CFLAGS="$EXTRA_CFLAGS $libsharing_CFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $libsharing_LIBS"

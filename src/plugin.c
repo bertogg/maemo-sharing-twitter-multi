@@ -17,6 +17,8 @@
  * along with this software. If not, see <http://www.gnu.org/licenses/>
  */
 
+#include "twitpic.h"
+
 #include <hildon/hildon.h>
 #include <sharing-plugin-interface.h>
 
@@ -49,8 +51,10 @@ sharing_plugin_interface_account_setup  (GtkWindow       *parent,
                                          SharingAccount **worked_on,
                                          osso_context_t  *osso)
 {
-  SharingPluginInterfaceAccountSetupResult ret = SHARING_ACCOUNT_SETUP_ERROR_UNKNOWN;
-  return ret;
+  if (twitpic_account_setup (parent))
+    return SHARING_ACCOUNT_SETUP_SUCCESS;
+  else
+    return SHARING_ACCOUNT_SETUP_ERROR_UNKNOWN;
 }
 
 SharingPluginInterfaceAccountValidateResult
