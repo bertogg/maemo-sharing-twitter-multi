@@ -1,0 +1,376 @@
+/*
+ * This file is part of maemo-sharing-twitpic
+ *
+ * Copyright (C) 2010 Igalia, S.L.
+ * Authors: Alberto Garcia <agarcia@igalia.com>
+ *
+ * This is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License version 3 as
+ * published by the Free Software Foundation.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this software. If not, see <http://www.gnu.org/licenses/>
+ */
+
+#include "util.h"
+
+#include <oauth.h>
+#include <curl/curl.h>
+#include <string.h>
+#include <sharing-http.h>
+
+#define TWITTER_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
+#define TWITTER_ACCESS_TOKEN_URL  "https://api.twitter.com/oauth/access_token"
+#define TWITTER_AUTHORIZE_URL     "https://api.twitter.com/oauth/authorize"
+#define CONSUMER_KEY              "WmyOdRu3svydhjw2SKgqZA"
+#define CONSUMER_SECRET           "psF3jiC2uMVWG7P1sd2bVEhFmHmWJOUTcbvevqbrcc"
+
+static gchar *access_secret = NULL; /* FIXME */
+
+static GHashTable *
+parse_reply                             (const gchar *buffer)
+{
+  GHashTable *hash;
+  gint i;
+  gchar **lines;
+
+  hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+  lines = g_strsplit (buffer, "&", 0);
+
+  for (i = 0; lines[i] != NULL; i++)
+    {
+      gchar **line = g_strsplit (lines[i], "=", 2);
+      if (line[0] != NULL && line[1] != NULL)
+        {
+          gchar *key = g_strstrip (g_strdup (line[0]));
+          gchar *val = g_strstrip (g_strdup (line[1]));
+          if (key[0] != '\0' && val[0] != '\0')
+            {
+              g_hash_table_insert (hash, key, val);
+            }
+          else
+            {
+              g_free (key);
+              g_free (val);
+            }
+        }
+      g_strfreev (line);
+    }
+  g_strfreev (lines);
+
+  return hash;
+}
+
+static void
+string_replace                          (GString     *str,
+                                         const gchar *old,
+                                         const gchar *new)
+{
+  gint oldlen = strlen (old);
+  gint newlen = strlen (new);
+  const gchar *cur = str->str;
+  while ((cur = strstr (cur, old)) != NULL)
+    {
+      gint position = cur - str->str;
+      g_string_erase (str, position, oldlen);
+      g_string_insert (str, position, new);
+      cur = str->str + position + newlen;
+    }
+}
+
+static gchar *
+escape_url                              (const gchar *url)
+{
+  CURL *handle;
+  gchar *str, *curl_str;
+
+  g_return_val_if_fail (url != NULL, NULL);
+
+  handle = curl_easy_init ();
+
+  curl_str = curl_easy_escape (handle, url, 0);
+
+  str = g_strdup (curl_str);
+  curl_free (curl_str);
+  curl_easy_cleanup (handle);
+
+  return str;
+}
+
+
+static gchar *
+get_oauth_signature_valist              (const gchar *proto,
+                                         const gchar *url,
+                                         va_list      args)
+{
+  GString *base;
+  gchar *retvalue;
+  const gchar *param;
+
+  base = g_string_sized_new (300);
+
+  g_string_assign (base, proto);
+  g_string_append_c (base, '&');
+  g_string_append (base, url);
+  string_replace (base, ":", "%3A");
+  string_replace (base, "/", "%2F");
+  g_string_append_c (base, '&');
+
+  param = va_arg (args, gchar *);
+  while (param != NULL)
+    {
+      const gchar *previous;
+      const gchar *value = va_arg (args, gchar *);
+
+      g_return_val_if_fail (value != NULL, NULL);
+
+      g_string_append (base, param);
+      g_string_append (base, "%3D");
+      g_string_append (base, value);
+
+      previous = param;
+      param = va_arg (args, gchar *);
+
+      if (param != NULL)
+        {
+          g_assert (g_strcmp0 (previous, param) <= 0);
+          g_string_append (base, "%26");
+        }
+    }
+
+  {
+    gchar *secret, *str;
+
+    secret = g_strconcat (CONSUMER_SECRET "&", access_secret, NULL);
+    str = oauth_sign_hmac_sha1 (base->str, secret);
+    g_free (secret);
+
+    g_string_free (base, TRUE);
+
+    retvalue = escape_url (str);
+    g_free (str);
+  }
+
+  return retvalue;
+}
+
+static gchar *
+get_oauth_signature                     (const gchar *proto,
+                                         const gchar *url,
+                                         ...)
+{
+  gchar *retvalue;
+  va_list args;
+  va_start (args, url);
+  retvalue = get_oauth_signature_valist (proto, url, args);
+  va_end (args);
+  return retvalue;
+}
+
+/*
+  Receives a URL and a NULL-terminated list of (param,value) and
+  returns the full URL signed with the 'oauth_signature' parameter
+ */
+static gchar *
+get_signed_url                          (const gchar *url,
+                                         ...)
+{
+  GString *final_url;
+  gchar *signature;
+  const gchar *param;
+  va_list args;
+
+  final_url = g_string_sized_new (300);
+  g_string_assign (final_url, url);
+  g_string_append_c (final_url, '?');
+
+  va_start (args, url);
+  param = va_arg (args, gchar *);
+  while (param != NULL)
+    {
+      const gchar *value = va_arg (args, gchar *);
+
+      g_string_append (final_url, param);
+      g_string_append_c (final_url, '=');
+      g_string_append (final_url, value);
+
+      param = va_arg (args, gchar *);
+      g_string_append_c (final_url, '&');
+    }
+  va_end (args);
+
+  va_start (args, url);
+  signature = get_oauth_signature_valist ("GET", url, args);
+  va_end (args);
+
+  g_string_append (final_url, "oauth_signature=");
+  g_string_append (final_url, signature);
+
+  g_free (signature);
+
+  return g_string_free (final_url, FALSE);
+}
+
+static gchar *
+get_twitter_request_token_url           (void)
+{
+  gchar *timestamp, *nonce, *url;
+
+  timestamp = g_strdup_printf ("%lu", time (NULL));
+  nonce = oauth_gen_nonce ();
+
+  url = get_signed_url (TWITTER_REQUEST_TOKEN_URL,
+                        "oauth_callback", "oob",
+                        "oauth_consumer_key", CONSUMER_KEY,
+                        "oauth_nonce", nonce,
+                        "oauth_signature_method", "HMAC-SHA1",
+                        "oauth_timestamp", timestamp,
+                        "oauth_version", "1.0",
+                        NULL);
+
+  g_free (timestamp);
+  g_free (nonce);
+
+  return url;
+}
+
+static gchar *
+get_access_token_url                    (gchar *request_token,
+                                         gchar *pin)
+{
+  gchar *timestamp, *nonce, *url;
+  g_return_val_if_fail (request_token && pin, NULL);
+
+  timestamp = g_strdup_printf ("%lu", time (NULL));
+  nonce = oauth_gen_nonce ();
+
+  url = get_signed_url (TWITTER_ACCESS_TOKEN_URL,
+                        "oauth_callback", "oob",
+                        "oauth_consumer_key", CONSUMER_KEY,
+                        "oauth_nonce", nonce,
+                        "oauth_signature_method", "HMAC-SHA1",
+                        "oauth_timestamp", timestamp,
+                        "oauth_token", request_token,
+                        "oauth_verifier", pin,
+                        "oauth_version", "1.0",
+                        NULL);
+  g_free (timestamp);
+  g_free (nonce);
+
+  return url;
+}
+
+gboolean
+get_twitter_access_token                (gchar  *request_token,
+                                         gchar  *pin,
+                                         gchar **access_token,
+                                         gchar **access_secret,
+                                         gchar **screen_name)
+{
+  gchar *url;
+
+  g_return_val_if_fail (request_token && pin, FALSE);
+  g_return_val_if_fail (access_token && access_secret && screen_name, FALSE);
+
+  *access_token = *access_secret = *screen_name = NULL;
+
+  url = get_access_token_url (request_token, pin);
+
+  if (url)
+    {
+      SharingHTTP *http;
+      SharingHTTPRunResponse ret;
+      http = sharing_http_new ();
+      ret = sharing_http_run (http, url);
+
+      if (ret == SHARING_HTTP_RUNRES_SUCCESS)
+        {
+          GHashTable *t;
+          gsize len;
+          const gchar *reply, *token, *secret, *name;
+
+          reply = sharing_http_get_res_body (http, &len);
+          t = parse_reply (reply);
+
+          token  = g_hash_table_lookup (t, "oauth_token");
+          secret = g_hash_table_lookup (t, "oauth_token_secret");
+          name   = g_hash_table_lookup (t, "screen_name");
+
+          if (token && secret && name)
+            {
+              *access_token  = g_strdup (token);
+              *access_secret = g_strdup (secret);
+              *screen_name   = g_strdup (name);
+            }
+
+          g_hash_table_destroy (t);
+        }
+
+      g_free (url);
+      sharing_http_unref (http);
+    }
+
+  return (*access_token != NULL);
+}
+
+static gboolean
+get_twitter_request_token               (gchar **token,
+                                         gchar **secret)
+{
+  gchar *url;
+  SharingHTTP *http;
+  SharingHTTPRunResponse ret;
+
+  g_return_val_if_fail (token != NULL && secret != NULL, FALSE);
+
+  *token = *secret = NULL;
+
+  url = get_twitter_request_token_url ();
+  http = sharing_http_new ();
+  ret = sharing_http_run (http, url);
+
+  if (ret == SHARING_HTTP_RUNRES_SUCCESS)
+    {
+      GHashTable *t;
+      gsize len;
+      const gchar *reply, *oauth_token, *oauth_token_secret;
+
+      reply = sharing_http_get_res_body (http, &len);
+      t = parse_reply (reply);
+
+      oauth_token = g_hash_table_lookup (t, "oauth_token");
+      oauth_token_secret = g_hash_table_lookup (t, "oauth_token_secret");
+
+      if (oauth_token && oauth_token_secret)
+        {
+          *token = g_strdup (oauth_token);
+          *secret = g_strdup (oauth_token_secret);
+        }
+
+      g_hash_table_destroy (t);
+    }
+
+  g_free (url);
+  sharing_http_unref (http);
+
+  return (*token != NULL);
+}
+
+gchar *
+get_twitter_auth_url                    (gchar **token,
+                                         gchar **secret)
+{
+  gchar *url = NULL;
+
+  g_return_val_if_fail (token != NULL && secret != NULL, NULL);
+
+  if (get_twitter_request_token (token, secret))
+    url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", *token, NULL);
+
+  return url;
+}

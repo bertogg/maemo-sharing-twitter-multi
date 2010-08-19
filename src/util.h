@@ -17,22 +17,24 @@
  * along with this software. If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef __TWITPIC_H__
-#define __TWITPIC_H__
+#ifndef __UTIL_H__
+#define __UTIL_H__
 
-#include <hildon/hildon.h>
-#include <sharing-plugin-interface.h>
+#include <glib.h>
 
 G_BEGIN_DECLS
 
-gboolean
-twitpic_account_setup                   (SharingAccount *account,
-                                         GtkWindow      *parent);
+gchar *
+get_twitter_auth_url                    (gchar **token,
+                                         gchar **secret);
 
 gboolean
-twitpic_account_validate                (SharingAccount *account,
-                                         gboolean       *dead_mans_switch);
+get_twitter_access_token                (gchar  *request_token,
+                                         gchar  *pin,
+                                         gchar **access_token,
+                                         gchar **access_secret,
+                                         gchar **screen_name);
 
 G_END_DECLS
 
-#endif /* __TWITPIC_H__ */
+#endif /* __UTIL_H__ */

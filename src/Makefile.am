@@ -10,7 +10,8 @@
 plugins_LTLIBRARIES = libtwitpic.la
 
 libtwitpic_la_SOURCES = plugin.c \
-	twitpic.c twitpic.h
+	twitpic.c twitpic.h \
+	util.c util.h
 
 libtwitpic_la_CFLAGS = $(EXTRA_CFLAGS)
 libtwitpic_la_LIBADD = $(EXTRA_LIBS)

@@ -32,6 +32,10 @@ PKG_CHECK_MODULES(libconic, conic)
 EXTRA_CFLAGS="$EXTRA_CFLAGS $libconic_CFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $libconic_LIBS"
 
+PKG_CHECK_MODULES(liboauth, oauth)
+EXTRA_CFLAGS="$EXTRA_CFLAGS $liboauth_CFLAGS"
+EXTRA_LIBS="$EXTRA_LIBS $liboauth_LIBS"
+
 #################
 # Other options #
 #################

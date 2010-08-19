@@ -51,7 +51,7 @@ sharing_plugin_interface_account_setup  (GtkWindow       *parent,
                                          SharingAccount **worked_on,
                                          osso_context_t  *osso)
 {
-  if (twitpic_account_setup (parent))
+  if (twitpic_account_setup (*worked_on, parent))
     return SHARING_ACCOUNT_SETUP_SUCCESS;
   else
     return SHARING_ACCOUNT_SETUP_ERROR_UNKNOWN;
@@ -64,8 +64,10 @@ sharing_plugin_interface_account_validate
                                          gboolean        *cont,
                                          gboolean        *dead_mans_switch)
 {
-  SharingPluginInterfaceAccountValidateResult ret_val = SHARING_ACCOUNT_VALIDATE_ERROR_UNKNOWN;
-  return ret_val;
+  if (twitpic_account_validate (account, dead_mans_switch))
+    return SHARING_ACCOUNT_VALIDATE_SUCCESS;
+  else
+    return SHARING_ACCOUNT_VALIDATE_ERROR_UNKNOWN;
 }
 
 SharingPluginInterfaceEditAccountResult
@@ -74,6 +76,6 @@ sharing_plugin_interface_edit_account   (GtkWindow       *parent,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
-  SharingPluginInterfaceEditAccountResult ret = SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN;
+  SharingPluginInterfaceEditAccountResult ret = SHARING_EDIT_ACCOUNT_DELETE;
   return ret;
 }
