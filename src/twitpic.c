@@ -27,30 +27,26 @@ static void
 register_account_clicked                (GtkWidget *button,
                                          gpointer   data)
 {
-  gchar *token, *secret;
-  gchar *url = get_twitter_auth_url (&token, &secret);
+  SharingAccount *account = data;
+  gchar *url = twitter_get_auth_url (account);
   if (url)
     {
-      SharingAccount *account = data;
       hildon_uri_open (url, NULL, NULL);
-      sharing_account_set_param (account, "twitter-req-token", token);
-      sharing_account_set_param (account, "twitter-req-secret", secret);
       g_free (url);
-      g_free (token);
-      g_free (secret);
     }
   gtk_dialog_response (GTK_DIALOG (gtk_widget_get_toplevel (button)),
                        GTK_RESPONSE_ACCEPT);
 }
 
 static gboolean
-twitpic_account_enter_pin               (GtkWindow  *parent,
-                                         gchar     **pin)
+twitpic_account_enter_pin               (SharingAccount *account,
+                                         GtkWindow      *parent)
 {
   gint response;
+  gchar *pin = NULL;
   GtkWidget *d, *label, *entry, *hbox;
 
-  g_return_val_if_fail (pin != NULL, FALSE);
+  g_return_val_if_fail (account != NULL, FALSE);
 
   d = gtk_dialog_new ();
   hbox = gtk_hbox_new (FALSE, 0);
@@ -70,10 +66,11 @@ twitpic_account_enter_pin               (GtkWindow  *parent,
   response = gtk_dialog_run (GTK_DIALOG (d));
 
   if (response == GTK_RESPONSE_ACCEPT)
-    *pin = g_strstrip (g_strdup (gtk_entry_get_text (GTK_ENTRY (entry))));
-  else
-    *pin = NULL;
+    pin = g_strstrip (g_strdup (gtk_entry_get_text (GTK_ENTRY (entry))));
 
+  twitter_account_set_pin (account, pin);
+
+  g_free (pin);
   gtk_widget_destroy (d);
 
   return (response == GTK_RESPONSE_ACCEPT);
@@ -110,12 +107,7 @@ twitpic_account_setup                   (SharingAccount *account,
   gtk_widget_destroy (d);
 
   if (response != GTK_RESPONSE_DELETE_EVENT)
-    {
-      gchar *pin;
-      success = twitpic_account_enter_pin (parent, &pin);
-      sharing_account_set_param (account, "twitter-pin", pin);
-      g_free (pin);
-    }
+    success = twitpic_account_enter_pin (account, parent);
 
   return success;
 }
@@ -125,51 +117,7 @@ gboolean
 twitpic_account_validate                (SharingAccount *account,
                                          gboolean       *dead_mans_switch)
 {
-  gboolean retval = FALSE;
-  gchar *token, *secret, *name;
-
   *dead_mans_switch = FALSE;
-
-  token = sharing_account_get_param (account, "twitter-access-token");
-  secret = sharing_account_get_param (account, "twitter-access-secret");
-  name = sharing_account_get_username (account);
-
-  if (token && secret && name)
-    {
-      retval = TRUE;
-    }
-  else
-    {
-      gchar *req_token, *pin;
-      req_token = sharing_account_get_param (account, "twitter-req-token");
-      pin = sharing_account_get_param (account, "twitter-pin");
-
-      if (req_token && pin)
-        {
-          g_free (token);
-          g_free (secret);
-          g_free (name);
-          get_twitter_access_token (req_token, pin, &token, &secret, &name);
-          if (token && secret && name)
-            {
-              sharing_account_set_param (account, "twitter-access-token", token);
-              sharing_account_set_param (account, "twitter-access-secret", secret);
-              sharing_account_set_username (account, name);
-
-              sharing_account_set_param (account, "twitter-req-token", NULL);
-              sharing_account_set_param (account, "twitter-req-secret", NULL);
-              sharing_account_set_param (account, "twitter-pin", NULL);
-              retval = TRUE;
-            }
-        }
-
-      g_free (req_token);
-      g_free (pin);
-    }
-
-  g_free (token);
-  g_free (secret);
-  g_free (name);
-
-  return retval;
+  return twitter_account_validate (account);
 }
+

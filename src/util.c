@@ -26,6 +26,11 @@
 #define TWITTER_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
 #define TWITTER_ACCESS_TOKEN_URL  "https://api.twitter.com/oauth/access_token"
 #define TWITTER_AUTHORIZE_URL     "https://api.twitter.com/oauth/authorize"
+#define PARAM_ACCESS_TOKEN        "twitter-access-token"
+#define PARAM_ACCESS_SECRET       "twitter-access-secret"
+#define PARAM_REQUEST_TOKEN       "twitter-request-token"
+#define PARAM_REQUEST_SECRET      "twitter-request-secret"
+#define PARAM_PIN                 "twitter-pin"
 #define CONSUMER_KEY              "WmyOdRu3svydhjw2SKgqZA"
 #define CONSUMER_SECRET           "psF3jiC2uMVWG7P1sd2bVEhFmHmWJOUTcbvevqbrcc"
 
@@ -341,15 +346,91 @@ get_twitter_request_token               (gchar **token,
 }
 
 gchar *
-get_twitter_auth_url                    (gchar **token,
-                                         gchar **secret)
+twitter_get_auth_url                    (SharingAccount *account)
 {
+  gchar *token, *secret;
   gchar *url = NULL;
 
-  g_return_val_if_fail (token != NULL && secret != NULL, NULL);
+  g_return_val_if_fail (account != NULL, NULL);
 
-  if (get_twitter_request_token (token, secret))
-    url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", *token, NULL);
+  if (get_twitter_request_token (&token, &secret))
+    {
+      url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", token, NULL);
+      sharing_account_set_param (account, PARAM_REQUEST_TOKEN, token);
+      sharing_account_set_param (account, PARAM_REQUEST_SECRET, secret);
+      g_free (token);
+      g_free (secret);
+    }
 
   return url;
+}
+
+void
+twitter_account_set_pin                 (SharingAccount *account,
+                                         const gchar    *pin)
+{
+  g_return_if_fail (account != NULL);
+
+  sharing_account_set_param (account, PARAM_PIN, pin);
+}
+
+gboolean
+twitter_account_validate                (SharingAccount *account)
+{
+  gboolean valid_account;
+
+  {
+    gchar *token, *secret, *name;
+
+    token = sharing_account_get_param (account, PARAM_ACCESS_TOKEN);
+    secret = sharing_account_get_param (account, PARAM_ACCESS_SECRET);
+    name = sharing_account_get_username (account);
+
+    /* An account with these three parameters is valid */
+    valid_account = (token && secret && name);
+
+    g_free (token);
+    g_free (secret);
+    g_free (name);
+  }
+
+  if (!valid_account)
+    {
+      gchar *req_token, *pin;
+
+      req_token = sharing_account_get_param (account, PARAM_REQUEST_TOKEN);
+      pin = sharing_account_get_param (account, PARAM_PIN);
+
+      /* With the request token and the pin, we can obtain the access token */
+      if (req_token && pin)
+        {
+          gchar *token, *secret, *name;
+
+          get_twitter_access_token (req_token, pin, &token, &secret, &name);
+
+          if (token && secret && name)
+            {
+              /* Store the new access token and the user name */
+              sharing_account_set_param (account, PARAM_ACCESS_TOKEN, token);
+              sharing_account_set_param (account, PARAM_ACCESS_SECRET, secret);
+              sharing_account_set_username (account, name);
+
+              /* Clear the request token and the pin, we don't need them anymore */
+              sharing_account_set_param (account, PARAM_REQUEST_TOKEN, NULL);
+              sharing_account_set_param (account, PARAM_REQUEST_SECRET, NULL);
+              sharing_account_set_param (account, PARAM_PIN, NULL);
+
+              valid_account = TRUE;
+            }
+
+          g_free (token);
+          g_free (secret);
+          g_free (name);
+        }
+
+      g_free (req_token);
+      g_free (pin);
+    }
+
+  return valid_account;
 }

@@ -21,19 +21,19 @@
 #define __UTIL_H__
 
 #include <glib.h>
+#include <sharing-plugin-interface.h>
 
 G_BEGIN_DECLS
 
 gchar *
-get_twitter_auth_url                    (gchar **token,
-                                         gchar **secret);
+twitter_get_auth_url                    (SharingAccount *account);
 
 gboolean
-get_twitter_access_token                (gchar  *request_token,
-                                         gchar  *pin,
-                                         gchar **access_token,
-                                         gchar **access_secret,
-                                         gchar **screen_name);
+twitter_account_validate                (SharingAccount *account);
+
+void
+twitter_account_set_pin                 (SharingAccount *account,
+                                         const gchar    *pin);
 
 G_END_DECLS
 
