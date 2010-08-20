@@ -20,7 +20,6 @@
 #include "util.h"
 
 #include <oauth.h>
-#include <curl/curl.h>
 #include <string.h>
 #include <sharing-http.h>
 
@@ -84,26 +83,6 @@ string_replace                          (GString     *str,
 }
 
 static gchar *
-escape_url                              (const gchar *url)
-{
-  CURL *handle;
-  gchar *str, *curl_str;
-
-  g_return_val_if_fail (url != NULL, NULL);
-
-  handle = curl_easy_init ();
-
-  curl_str = curl_easy_escape (handle, url, 0);
-
-  str = g_strdup (curl_str);
-  curl_free (curl_str);
-  curl_easy_cleanup (handle);
-
-  return str;
-}
-
-
-static gchar *
 get_oauth_signature_valist              (const gchar *proto,
                                          const gchar *url,
                                          va_list      args)
@@ -152,7 +131,7 @@ get_oauth_signature_valist              (const gchar *proto,
 
     g_string_free (base, TRUE);
 
-    retvalue = escape_url (str);
+    retvalue = g_uri_escape_string (str, "", FALSE);
     g_free (str);
   }
 

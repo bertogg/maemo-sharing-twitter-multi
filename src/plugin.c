@@ -21,11 +21,13 @@
 
 #include <hildon/hildon.h>
 #include <sharing-plugin-interface.h>
+#include <curl/curl.h>
 
 guint
 sharing_plugin_interface_init           (gboolean *dead_mans_switch)
 {
   *dead_mans_switch = FALSE;
+  curl_global_init (CURL_GLOBAL_ALL);
   return 0;
 }
 
@@ -33,6 +35,7 @@ guint
 sharing_plugin_interface_uninit         (gboolean *dead_mans_switch)
 {
   *dead_mans_switch = FALSE;
+  curl_global_cleanup ();
   return 0;
 }
 
