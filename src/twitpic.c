@@ -207,8 +207,10 @@ twitpic_share_file                      (SharingTransfer *transfer,
       path = sharing_entry_media_get_localpath (media);
       mime = sharing_entry_media_get_mime (media);
       title = sharing_entry_media_get_title (media);
-      if (!title)
-        title = g_strdup ("");
+      if (title)
+        g_strstrip (title);
+      else
+        title = g_strdup ("Photo: ");
       account = sharing_entry_get_account (entry);
       if (path && mime && twitter_account_validate (account))
         {
