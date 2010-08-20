@@ -78,6 +78,5 @@ sharing_plugin_interface_edit_account   (GtkWindow       *parent,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
-  SharingPluginInterfaceEditAccountResult ret = SHARING_EDIT_ACCOUNT_DELETE;
-  return ret;
+  return twitpic_account_edit (parent, account, con, dead_mans_switch);
 }

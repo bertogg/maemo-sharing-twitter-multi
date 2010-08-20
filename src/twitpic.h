@@ -38,6 +38,12 @@ twitpic_share_file                      (SharingTransfer *transfer,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch);
 
+SharingPluginInterfaceEditAccountResult
+twitpic_account_edit                    (GtkWindow       *parent,
+                                         SharingAccount  *account,
+                                         ConIcConnection *con,
+                                         gboolean        *dead_mans_switch);
+
 G_END_DECLS
 
 #endif /* __TWITPIC_H__ */

@@ -26,16 +26,21 @@
 #define TWITPIC_API_KEY                 "43d219dfe0c80559511ded2e6bc432ad"
 
 static void
-register_account_clicked                (GtkWidget *button,
-                                         gpointer   data)
+open_auth_url                           (SharingAccount *account)
 {
-  SharingAccount *account = data;
   gchar *url = twitter_get_auth_url (account);
   if (url)
     {
       hildon_uri_open (url, NULL, NULL);
       g_free (url);
     }
+}
+
+static void
+register_account_clicked                (GtkWidget      *button,
+                                         SharingAccount *account)
+{
+  open_auth_url (account);
   gtk_dialog_response (GTK_DIALOG (gtk_widget_get_toplevel (button)),
                        GTK_RESPONSE_ACCEPT);
 }
@@ -215,4 +220,53 @@ twitpic_share_file                      (SharingTransfer *transfer,
     }
 
   return retval;
+}
+
+SharingPluginInterfaceEditAccountResult
+twitpic_account_edit                    (GtkWindow       *parent,
+                                         SharingAccount  *account,
+                                         ConIcConnection *con,
+                                         gboolean        *dead_mans_switch)
+{
+  gint response;
+  GtkWidget *d, *label;
+  enum { RESPONSE_EDIT, RESPONSE_REMOVE };
+
+  g_return_val_if_fail (account && dead_mans_switch, SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN);
+
+  d = gtk_dialog_new ();
+  gtk_window_set_title (GTK_WINDOW (d), "Edit account - Twitpic");
+  gtk_window_set_transient_for (GTK_WINDOW (d), parent);
+  gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_REMOVE, RESPONSE_REMOVE);
+  gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_EDIT, RESPONSE_EDIT);
+
+  label = gtk_label_new ("Press 'Edit' to open the Twitter web page.\n"
+                         "After that, enter the PIN number here\n"
+                         "to confirm your changes.");
+
+  gtk_container_add (GTK_CONTAINER (GTK_DIALOG (d)->vbox), label);
+
+  gtk_widget_show_all (d);
+  response = gtk_dialog_run (GTK_DIALOG (d));
+  gtk_widget_destroy (d);
+
+  switch (response)
+    {
+    case RESPONSE_EDIT:
+      open_auth_url (account);
+      if (twitpic_account_enter_pin (account, parent))
+        {
+          return SHARING_EDIT_ACCOUNT_SUCCESS;
+        }
+      else
+        {
+          return SHARING_EDIT_ACCOUNT_CANCELLED;
+        }
+    case RESPONSE_REMOVE:
+      return SHARING_EDIT_ACCOUNT_DELETE;
+    case GTK_RESPONSE_DELETE_EVENT:
+      return SHARING_EDIT_ACCOUNT_NOT_STARTED;
+    }
+
+  return SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN;
 }
