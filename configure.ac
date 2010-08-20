@@ -36,6 +36,10 @@ PKG_CHECK_MODULES(liboauth, oauth)
 EXTRA_CFLAGS="$EXTRA_CFLAGS $liboauth_CFLAGS"
 EXTRA_LIBS="$EXTRA_LIBS $liboauth_LIBS"
 
+PKG_CHECK_MODULES(libxml2, libxml-2.0)
+EXTRA_CFLAGS="$EXTRA_CFLAGS $libxml2_CFLAGS"
+EXTRA_LIBS="$EXTRA_LIBS $libxml2_LIBS"
+
 #################
 # Other options #
 #################

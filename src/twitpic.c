@@ -22,8 +22,42 @@
 
 #include <hildon-mime.h>
 #include <sharing-http.h>
+#include <libxml/parser.h>
 
 #define TWITPIC_API_KEY                 "43d219dfe0c80559511ded2e6bc432ad"
+
+static gchar *
+parse_twitpic_response                  (const gchar *response,
+                                         gsize        size)
+{
+  xmlDoc *doc;
+  gchar *url = NULL;
+
+  g_return_val_if_fail (response != NULL, NULL);
+
+  doc = xmlParseMemory (response, size);
+  if (doc != NULL)
+    {
+      xmlNode *iter, *image = NULL;
+
+      for (iter = xmlDocGetRootElement (doc); iter && !image; iter = iter->next)
+        if (xmlStrEqual (iter->name, (xmlChar *) "image"))
+          image = iter;
+
+      if (image != NULL)
+        for (iter = image->xmlChildrenNode; iter && !url; iter = iter->next)
+          if (xmlStrEqual (iter->name, (xmlChar *) "url"))
+            {
+              xmlChar *s = xmlNodeGetContent (iter);
+              url = g_strdup ((gchar *) s);
+              xmlFree (s);
+            }
+
+      xmlFreeDoc (doc);
+    }
+
+  return url;
+}
 
 static void
 open_auth_url                           (SharingAccount *account)
@@ -197,11 +231,21 @@ twitpic_share_file                      (SharingTransfer *transfer,
           switch (httpret)
             {
             case SHARING_HTTP_RUNRES_SUCCESS:
-              if (twitter_update_status (title, account))
-                {
-                  retval = SHARING_SEND_SUCCESS;
-                  sharing_entry_media_set_sent (media, TRUE);
-                }
+              {
+                gsize len;
+                const gchar *body;
+                gchar *img_url, *tweet;
+                body = sharing_http_get_res_body (http, &len);
+                img_url = parse_twitpic_response (body, len);
+                tweet = g_strconcat (title, " ", img_url, NULL);
+                if (twitter_update_status (tweet, account))
+                  {
+                    retval = SHARING_SEND_SUCCESS;
+                    sharing_entry_media_set_sent (media, TRUE);
+                  }
+                g_free (img_url);
+                g_free (tweet);
+              }
               break;
             case SHARING_HTTP_RUNRES_CANCELLED:
               retval = SHARING_SEND_CANCELLED;
