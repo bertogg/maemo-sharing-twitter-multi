@@ -23,6 +23,8 @@
 #include <hildon-mime.h>
 #include <sharing-http.h>
 
+#define TWITPIC_API_KEY                 "43d219dfe0c80559511ded2e6bc432ad"
+
 static void
 register_account_clicked                (GtkWidget *button,
                                          gpointer   data)
@@ -121,3 +123,96 @@ twitpic_account_validate                (SharingAccount *account,
   return twitter_account_validate (account);
 }
 
+typedef struct {
+  SharingTransfer *transfer;
+  gboolean        *dead_mans_switch;
+  guint64          size;
+} UploadProgressData;
+
+static gboolean
+upload_progress_cb                      (SharingHTTP *http,
+                                         guint64      bytes_sent,
+                                         gpointer     user_data)
+{
+  UploadProgressData *data = user_data;
+  gdouble progress = 0.0;
+  *(data->dead_mans_switch) = FALSE;
+  if (data->size > 0)
+    progress = (gdouble) bytes_sent / data->size;
+  sharing_transfer_set_progress (data->transfer, CLAMP (progress, 0.0, 1.0));
+  return TRUE;
+}
+
+SharingPluginInterfaceSendResult
+twitpic_share_file                      (SharingTransfer *transfer,
+                                         ConIcConnection *con,
+                                         gboolean        *dead_mans_switch)
+{
+  SharingPluginInterfaceSendResult retval;
+  SharingEntry *entry;
+  const GSList *l;
+
+  retval = SHARING_SEND_ERROR_UNKNOWN;
+  *dead_mans_switch = FALSE;
+  sharing_transfer_set_progress (transfer, 0.0);
+
+  entry = sharing_transfer_get_entry (transfer);
+  l = sharing_entry_get_media (entry);
+
+  if (l && l->data)
+    {
+      const gchar *path;
+      gchar *title, *mime;
+      SharingAccount *account;
+      SharingEntryMedia *media = l->data;
+      path = sharing_entry_media_get_localpath (media);
+      mime = sharing_entry_media_get_mime (media);
+      title = sharing_entry_media_get_title (media);
+      if (!title)
+        title = g_strdup ("");
+      account = sharing_entry_get_account (entry);
+      if (path && mime && twitter_account_validate (account))
+        {
+          char *hdr;
+          SharingHTTP *http = sharing_http_new ();
+          SharingHTTPRunResponse httpret;
+          UploadProgressData data;
+          data.transfer = transfer;
+          data.dead_mans_switch = dead_mans_switch;
+          data.size = sharing_entry_media_get_size (media);
+          sharing_http_set_progress_callback (http, upload_progress_cb, &data);
+          sharing_http_add_req_multipart_file (http, "media", path, mime);
+          sharing_http_add_req_multipart_data (http, "key", TWITPIC_API_KEY, -1, "text/plain");
+          sharing_http_add_req_multipart_data (http, "message", title, -1, "text/plain");
+          hdr = twitter_get_verify_credentials_header (account);
+          sharing_http_add_req_header_line (http, hdr);
+          g_free (hdr);
+          sharing_http_add_req_header_line (http, "X-Auth-Service-Provider: " TWITTER_VERIFY_CREDENTIALS_URL);
+          httpret = sharing_http_run (http, "http://api.twitpic.com/2/upload.xml");
+          switch (httpret)
+            {
+            case SHARING_HTTP_RUNRES_SUCCESS:
+              if (twitter_update_status (title, account))
+                {
+                  retval = SHARING_SEND_SUCCESS;
+                  sharing_entry_media_set_sent (media, TRUE);
+                }
+              break;
+            case SHARING_HTTP_RUNRES_CANCELLED:
+              retval = SHARING_SEND_CANCELLED;
+              break;
+            case SHARING_HTTP_RUNRES_CONNECTION_PROBLEM:
+              retval = SHARING_SEND_ERROR_CONNECTION;
+              break;
+            default:
+              retval = SHARING_SEND_ERROR_UNKNOWN;
+            }
+          sharing_http_unref (http);
+        }
+      g_free (mime);
+      g_free (title);
+      sharing_account_free (account);
+    }
+
+  return retval;
+}

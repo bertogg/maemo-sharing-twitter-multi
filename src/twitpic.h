@@ -33,6 +33,11 @@ gboolean
 twitpic_account_validate                (SharingAccount *account,
                                          gboolean       *dead_mans_switch);
 
+SharingPluginInterfaceSendResult
+twitpic_share_file                      (SharingTransfer *transfer,
+                                         ConIcConnection *con,
+                                         gboolean        *dead_mans_switch);
+
 G_END_DECLS
 
 #endif /* __TWITPIC_H__ */

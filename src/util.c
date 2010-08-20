@@ -23,18 +23,14 @@
 #include <string.h>
 #include <sharing-http.h>
 
-#define TWITTER_REQUEST_TOKEN_URL "https://api.twitter.com/oauth/request_token"
-#define TWITTER_ACCESS_TOKEN_URL  "https://api.twitter.com/oauth/access_token"
-#define TWITTER_AUTHORIZE_URL     "https://api.twitter.com/oauth/authorize"
 #define PARAM_ACCESS_TOKEN        "twitter-access-token"
 #define PARAM_ACCESS_SECRET       "twitter-access-secret"
 #define PARAM_REQUEST_TOKEN       "twitter-request-token"
 #define PARAM_REQUEST_SECRET      "twitter-request-secret"
 #define PARAM_PIN                 "twitter-pin"
+
 #define CONSUMER_KEY              "WmyOdRu3svydhjw2SKgqZA"
 #define CONSUMER_SECRET           "psF3jiC2uMVWG7P1sd2bVEhFmHmWJOUTcbvevqbrcc"
-
-static gchar *access_secret = NULL; /* FIXME */
 
 static GHashTable *
 parse_reply                             (const gchar *buffer)
@@ -90,6 +86,7 @@ string_replace                          (GString     *str,
 static gchar *
 get_oauth_signature_valist              (const gchar *proto,
                                          const gchar *url,
+                                         const gchar *access_secret,
                                          va_list      args)
 {
   GString *base;
@@ -146,12 +143,13 @@ get_oauth_signature_valist              (const gchar *proto,
 static gchar *
 get_oauth_signature                     (const gchar *proto,
                                          const gchar *url,
+                                         const gchar *access_secret,
                                          ...)
 {
   gchar *retvalue;
   va_list args;
-  va_start (args, url);
-  retvalue = get_oauth_signature_valist (proto, url, args);
+  va_start (args, access_secret);
+  retvalue = get_oauth_signature_valist (proto, url, access_secret, args);
   va_end (args);
   return retvalue;
 }
@@ -189,7 +187,7 @@ get_signed_url                          (const gchar *url,
   va_end (args);
 
   va_start (args, url);
-  signature = get_oauth_signature_valist ("GET", url, args);
+  signature = get_oauth_signature_valist ("GET", url, "", args);
   va_end (args);
 
   g_string_append (final_url, "oauth_signature=");
@@ -249,7 +247,7 @@ get_access_token_url                    (gchar *request_token,
   return url;
 }
 
-gboolean
+static gboolean
 get_twitter_access_token                (gchar  *request_token,
                                          gchar  *pin,
                                          gchar **access_token,
@@ -433,4 +431,113 @@ twitter_account_validate                (SharingAccount *account)
     }
 
   return valid_account;
+}
+
+gchar *
+twitter_get_verify_credentials_header   (SharingAccount *account)
+{
+  gchar *token, *secret, *hdr = NULL;
+
+  g_return_val_if_fail (account != NULL, NULL);
+
+  token = sharing_account_get_param (account, PARAM_ACCESS_TOKEN);
+  secret = sharing_account_get_param (account, PARAM_ACCESS_SECRET);
+
+  if (token && secret)
+    {
+      gchar *sig, *nonce, *timestamp;
+
+      timestamp = g_strdup_printf ("%lu", time (NULL));
+      nonce = oauth_gen_nonce ();
+
+      sig = get_oauth_signature ("GET", TWITTER_VERIFY_CREDENTIALS_URL, secret,
+                                 "oauth_callback", "oob",
+                                 "oauth_consumer_key", CONSUMER_KEY,
+                                 "oauth_nonce", nonce,
+                                 "oauth_signature_method", "HMAC-SHA1",
+                                 "oauth_timestamp", timestamp,
+                                 "oauth_token", token,
+                                 "oauth_version", "1.0",
+                                 NULL);
+
+      hdr = g_strconcat ("X-Verify-Credentials-Authorization: OAuth realm=\"http://api.twitter.com/\", "
+                         "oauth_callback=\"oob\", "
+                         "oauth_consumer_key=\"" CONSUMER_KEY "\", "
+                         "oauth_nonce=\"", nonce, "\", "
+                         "oauth_signature_method=\"HMAC-SHA1\", "
+                         "oauth_timestamp=\"", timestamp, "\", "
+                         "oauth_token=\"", token, "\", "
+                         "oauth_version=\"1.0\", "
+                         "oauth_signature=\"", sig, "\"", NULL);
+
+      g_free (sig);
+      g_free (timestamp);
+      g_free (nonce);
+    }
+
+  g_free (token);
+  g_free (secret);
+
+  return hdr;
+}
+
+gboolean
+twitter_update_status                   (const gchar    *status,
+                                         SharingAccount *account)
+{
+  gchar *token, *secret;
+  gboolean retvalue = FALSE;
+
+  g_return_val_if_fail (status && account, FALSE);
+
+  token = sharing_account_get_param (account, PARAM_ACCESS_TOKEN);
+  secret = sharing_account_get_param (account, PARAM_ACCESS_SECRET);
+
+  if (token && secret)
+    {
+      gchar *sig, *hdr, *timestamp, *nonce;
+      SharingHTTPRunResponse httpret;
+      SharingHTTP *http;
+
+      timestamp = g_strdup_printf ("%lu", time (NULL));
+      nonce = oauth_gen_nonce ();
+
+      sig = get_oauth_signature ("POST", TWITTER_UPDATE_STATUS_URL, secret,
+                                 "oauth_callback", "oob",
+                                 "oauth_consumer_key", CONSUMER_KEY,
+                                 "oauth_nonce", nonce,
+                                 "oauth_signature_method", "HMAC-SHA1",
+                                 "oauth_timestamp", timestamp,
+                                 "oauth_token", token,
+                                 "oauth_version", "1.0",
+                                 NULL);
+
+      hdr = g_strconcat ("OAuth oauth_callback=\"oob\", "
+                         "oauth_consumer_key=\"" CONSUMER_KEY "\", "
+                         "oauth_nonce=\"", nonce, "\", "
+                         "oauth_signature_method=\"HMAC-SHA1\", "
+                         "oauth_timestamp=\"", timestamp, "\", "
+                         "oauth_token=\"", token, "\", "
+                         "oauth_version=\"1.0\", "
+                         "oauth_signature=\"", sig, "\"", NULL);
+
+      http = sharing_http_new ();
+      sharing_http_add_req_multipart_data (http, "status", status, -1, "text/plain");
+      sharing_http_add_req_header (http, "Authorization", hdr);
+      sharing_http_add_req_header (http, "Expect", "");
+      httpret = sharing_http_run (http, TWITTER_UPDATE_STATUS_URL);
+      sharing_http_unref (http);
+
+      retvalue = (httpret == SHARING_HTTP_RUNRES_SUCCESS);
+
+      g_free (sig);
+      g_free (hdr);
+      g_free (timestamp);
+      g_free (nonce);
+    }
+
+  g_free (token);
+  g_free (secret);
+
+  return retvalue;
 }

@@ -44,8 +44,7 @@ sharing_plugin_interface_send           (SharingTransfer *transfer,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
-  SharingPluginInterfaceSendResult ret_val = SHARING_SEND_ERROR_UNKNOWN;
-  return ret_val;
+  return twitpic_share_file (transfer, con, dead_mans_switch);
 }
 
 SharingPluginInterfaceAccountSetupResult
