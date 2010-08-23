@@ -1,5 +1,5 @@
 /*
- * This file is part of maemo-sharing-twitpic
+ * This file is part of maemo-sharing-twitter-multi
  *
  * Copyright (C) 2010 Igalia, S.L.
  * Authors: Alberto Garcia <agarcia@igalia.com>

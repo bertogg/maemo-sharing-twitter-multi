@@ -1,6 +1,8 @@
-Twitpic sharing plugin for Maemo
---------------------------------
+Twitter picture sharing plugin for Maemo
+----------------------------------------
 
-This is a Twitpic sharing plugin for the Nokia N900
+This is a Twitter picture sharing plugin for the Nokia N900.
+
+It currently supports the Twitpic and Twitgoo services
 
 (C) 2010 Igalia, S.L.

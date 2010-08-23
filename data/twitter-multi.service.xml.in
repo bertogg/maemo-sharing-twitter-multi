@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<service plugin="libtwitpic.so" provider="Alberto Garcia">
+<service plugin="libtwittermulti.so" provider="Alberto Garcia">
   <accounts plugInSetup="1" plugInEdit="1">
     <signup>https://twitter.com/signup</signup>
   </accounts>
   <ui>
-    <name>Twitpic</name>
-    <icon type="post">@servicesdir@/twitpic-icon.png</icon>
-    <icon type="setup">@servicesdir@/twitpic-icon.png</icon>
+    <name>Twitter</name>
+    <icon type="post">@servicesdir@/twitter-multi.png</icon>
+    <icon type="setup">@servicesdir@/twitter-multi.png</icon>
     <options>
       <option id="service" type="enumeration" default="twitpic">
         <caption key="Service"/>

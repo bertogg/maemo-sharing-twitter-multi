@@ -2,7 +2,7 @@
 ### Initialization and basic checks ###
 #######################################
 AC_INIT(Makefile.am)
-AM_INIT_AUTOMAKE(twitpic-sharing, 0.1)
+AM_INIT_AUTOMAKE(twitter-multi-sharing, 0.1)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CPP
@@ -70,7 +70,7 @@ AC_SUBST(EXTRA_LIBS)
 AC_CONFIG_FILES([
     Makefile
     data/Makefile
-    data/twitpic.service.xml
+    data/twitter-multi.service.xml
     src/Makefile
 ])
 AC_OUTPUT
