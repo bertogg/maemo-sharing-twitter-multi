@@ -9,6 +9,28 @@ Package: maemo-sharing-twitter-multi
 Section: user/multimedia
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, sharing-manager
-Description: Twitter photo sharing plugin for Maemo
- This plugin allows you to upload pictures to Twitter.
+XB-Maemo-Display-Name: Sharing plugin for Twitter
+XB-Bugtracker: mailto:agarcia@igalia.com
+Description: Twitter photo sharing plugin for the Nokia N900
+ This plugin allows you to upload pictures to Twitter using the
+ sharing service.
  It currently supports Twitpic, Twitgoo and Mobypicture.
+XB-Maemo-Icon-26:
+ iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A
+ /wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9oIFxISAOWZtsMAAANqSURBVEjH
+ rZZPaFxVFMZ/351JJsmkTdTE0oqkhAhi1aigFFt048qFC63gQt2oK0VQcCOoqy6kqAt1UUHciRbc
+ mZ0Fbf0XtIhIKyqCxNJSldIkkyYzee98Lt5MMpNOQob2wmXuwHn3d8853zn3ii4jIgQMSNprOwfm
+ UkorXMsRESN2HLFj2Wsj/o3wKxExdK0gO+340g5HhOu5o55HRDRx4Q8jYvhqIbLjNTucheNMzX5r
+ zn7/rP3HZTdRrtt+/mpBJdvnIsK/L9n7T9m3zdq3ztqPn+6AfWx7tNf9y62FpEHw7lXjbxbQpQyq
+ JQjD2RU4eQlNDRrQlO0DEfGrpD7bre8DqAH/SMo3BQEVEAaWciipzVtgtdjPwL2SPm87YHPlDJi1
+ edf2jKRaOyi1FsXJ3Plt22gYjKjlppbTNk0tN5lVBg5I+sTmRdvlzTzqOgTkhp9qcPQcWrWusDAw
+ 1gf375QnKpbEYVtfAye2D1KRpx8W4Nv5ze0ahoeuQ29OyqNlJPFCT6AWrF/Qv4VNFfjiIvy1B01X
+ QfJdPYWuyN82ygOoJCivRVaNnkGogMUWB6mW4JExmBzAEsI+0RPILqS+fwQeHIVGF5qB4RI8MIKH
+ EgIWjY72BqIA3T0Mj41vZWYV2fQFm1dTSj9vAVLhgzsryUDW5mGXOpNNQ+IY6IOUdHKjQWpb11uo
+ SloXgIB6wGK2rsCN4rCNpJLtO2xPd3O5HbQCLJck3VyBzJ0efb8ApxbXYZ3yVxFhMS3pcEQc6Vb4
+ re6dJL4CDs6tiEOnC1hqepAEe/phchCGShukbbihD57chXf1I0HD5uGUdLxbjmzzqaSDY3340XH0
+ 0XnYUV7vDnN1+Lve2XBbHpcFvyyh927BO0rul/QscPyK0KWUDBwDXxwqoSduxHcOw3K+Hq7UDEG4
+ c9qF7H9cgN8uoyj64T2b5QhJ/9m8DGZvBd6YwPuqRZeOpto2m0lFvxsqtfLhfCtQAJ/Zegeh26vw
+ 9hR+bjcMpOKeqkf3OZ/BoXGYqLSKQ991FUPnte5R4HXJL9kisz2fS38uw/lGcQlqgxhuqsD0sF1N
+ SBK296WUzmznDTEY4adtX2i+gZxHOAs7C0fzd+1/Hm2Ps/BTttXTo8L29RF+xvaMHedsZ3bbrs1D
+ 2F6wYyYi7rOdNu7zP8wuSBagSQ6EAAAAAElFTkSuQmCC
