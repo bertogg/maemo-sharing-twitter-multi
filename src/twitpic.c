@@ -207,6 +207,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
   SharingEntry *entry;
   const GSList *l;
   const gchar *servicename;
+  gboolean post_to_twitter = TRUE;
   TwitterPicService service = SERVICE_TWITPIC;
 
   retval = SHARING_SEND_SUCCESS;
@@ -224,6 +225,9 @@ twitpic_share_file                      (SharingTransfer *transfer,
       else if (g_str_equal (servicename, "mobypicture"))
         service = SERVICE_MOBYPICTURE;
     }
+
+  if (g_strcmp0 (sharing_entry_get_option (entry, "posttotwitter"), "no") == 0)
+    post_to_twitter = FALSE;
 
   for (; l != NULL && retval == SHARING_SEND_SUCCESS; l = l->next)
     {
@@ -300,7 +304,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
                   {
                     gchar *tweet = g_strconcat (title, " ", img_url, NULL);
 
-                    if (twitter_update_status (tweet, account))
+                    if (!post_to_twitter || twitter_update_status (tweet, account))
                       sharing_entry_media_set_sent (media, TRUE);
 
                     g_free (img_url);

@@ -14,6 +14,11 @@
         <value id="twitgoo" key="Twitgoo"/>
         <value id="mobypicture" key="Mobypicture"/>
       </option>
+      <option id="posttotwitter" type="enumeration" default="yes">
+        <caption key="Post link to Twitter?"/>
+        <value id="yes" key="Yes"/>
+        <value id="no" key="No"/>
+      </option>
     </options>
   </ui>
 </service>
