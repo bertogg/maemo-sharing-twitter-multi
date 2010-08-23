@@ -191,36 +191,44 @@ twitpic_share_file                      (SharingTransfer *transfer,
   SharingEntry *entry;
   const GSList *l;
 
-  retval = SHARING_SEND_ERROR_UNKNOWN;
+  retval = SHARING_SEND_SUCCESS;
   *dead_mans_switch = FALSE;
   sharing_transfer_set_progress (transfer, 0.0);
 
   entry = sharing_transfer_get_entry (transfer);
   l = sharing_entry_get_media (entry);
 
-  if (l && l->data)
+  for (; l != NULL && retval == SHARING_SEND_SUCCESS; l = l->next)
     {
       const gchar *path;
-      gchar *title, *mime;
+      gchar *mime;
       SharingAccount *account;
       SharingEntryMedia *media = l->data;
+
+      g_return_val_if_fail (media != NULL, SHARING_SEND_ERROR_UNKNOWN);
+
       path = sharing_entry_media_get_localpath (media);
       mime = sharing_entry_media_get_mime (media);
-      title = sharing_entry_media_get_title (media);
-      if (title)
-        g_strstrip (title);
-      else
-        title = g_strdup ("Photo: ");
       account = sharing_entry_get_account (entry);
-      if (path && mime && twitter_account_validate (account))
+
+      if (path && mime && !sharing_entry_media_get_sent (media) &&
+          twitter_account_validate (account))
         {
-          char *hdr;
+          gchar *hdr, *title;
           SharingHTTP *http = sharing_http_new ();
           SharingHTTPRunResponse httpret;
           UploadProgressData data;
+
           data.transfer = transfer;
           data.dead_mans_switch = dead_mans_switch;
           data.size = sharing_entry_media_get_size (media);
+
+          title = sharing_entry_media_get_title (media);
+          if (title)
+            g_strstrip (title);
+          else
+            title = g_strdup ("Photo: ");
+
           sharing_http_set_progress_callback (http, upload_progress_cb, &data);
           sharing_http_add_req_multipart_file (http, "media", path, mime);
           sharing_http_add_req_multipart_data (http, "key", TWITPIC_API_KEY, -1, "text/plain");
@@ -242,7 +250,6 @@ twitpic_share_file                      (SharingTransfer *transfer,
                 tweet = g_strconcat (title, " ", img_url, NULL);
                 if (twitter_update_status (tweet, account))
                   {
-                    retval = SHARING_SEND_SUCCESS;
                     sharing_entry_media_set_sent (media, TRUE);
                   }
                 g_free (img_url);
@@ -258,11 +265,13 @@ twitpic_share_file                      (SharingTransfer *transfer,
             default:
               retval = SHARING_SEND_ERROR_UNKNOWN;
             }
+
           sharing_http_unref (http);
+          g_free (title);
         }
-      g_free (mime);
-      g_free (title);
+
       sharing_account_free (account);
+      g_free (mime);
     }
 
   return retval;
