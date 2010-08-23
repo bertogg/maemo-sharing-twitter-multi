@@ -18,6 +18,8 @@ This program is licensed under the GNU General Public License v3:
     On Debian systems, the complete text of the license can be found
     in the file /usr/share/common-licenses/GPL-3
 
+The Twitter icon (data/twitter-multi.png) is (C) Twitter
+
 The Debian packaging is Copyright (C) 2010, Alberto Garcia
 <agarcia@igalia.com> and is licensed under the GPL, see
 `/usr/share/common-licenses/GPL'.

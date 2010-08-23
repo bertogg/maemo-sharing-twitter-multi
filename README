@@ -1,8 +1,11 @@
-Twitter picture sharing plugin for Maemo
-----------------------------------------
+Twitter picture sharing plugin for the Nokia N900
+-------------------------------------------------
 
 This is a Twitter picture sharing plugin for the Nokia N900.
 
 It currently supports the Twitpic, Twitgoo and Mobypicture services
 
 (C) 2010 Igalia, S.L.
+
+The Twitter icon (twitter-multi.png and debian/control) is (C) Twitter
+and has been downloaded from http://twitter.com/about/files
