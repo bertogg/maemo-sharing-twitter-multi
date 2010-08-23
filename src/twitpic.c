@@ -244,16 +244,25 @@ twitpic_share_file                      (SharingTransfer *transfer,
               {
                 gsize len;
                 const gchar *body;
-                gchar *img_url, *tweet;
+                gchar *img_url;
+
                 body = sharing_http_get_res_body (http, &len);
                 img_url = parse_twitpic_response (body, len);
-                tweet = g_strconcat (title, " ", img_url, NULL);
-                if (twitter_update_status (tweet, account))
+
+                if (img_url != NULL)
                   {
-                    sharing_entry_media_set_sent (media, TRUE);
+                    gchar *tweet = g_strconcat (title, " ", img_url, NULL);
+
+                    if (twitter_update_status (tweet, account))
+                      sharing_entry_media_set_sent (media, TRUE);
+
+                    g_free (img_url);
+                    g_free (tweet);
                   }
-                g_free (img_url);
-                g_free (tweet);
+                else
+                  {
+                    retval = SHARING_SEND_ERROR_UNKNOWN;
+                  }
               }
               break;
             case SHARING_HTTP_RUNRES_CANCELLED:
