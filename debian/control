@@ -11,4 +11,4 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, sharing-manager
 Description: Twitter photo sharing plugin for Maemo
  This plugin allows you to upload pictures to Twitter.
- It currently supports Twitpic and Twitgoo.
+ It currently supports Twitpic, Twitgoo and Mobypicture.

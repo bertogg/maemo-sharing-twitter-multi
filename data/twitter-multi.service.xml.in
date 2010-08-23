@@ -12,6 +12,7 @@
         <caption key="Service"/>
         <value id="twitpic" key="Twitpic"/>
         <value id="twitgoo" key="Twitgoo"/>
+        <value id="mobypicture" key="Mobypicture"/>
       </option>
     </options>
   </ui>

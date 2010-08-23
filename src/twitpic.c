@@ -25,6 +25,7 @@
 #include <libxml/parser.h>
 
 #define TWITPIC_API_KEY                 "1f9ce28260728df0a40cafe3506a9407"
+#define MOBYPICTURE_API_KEY             "L5RL7tAoAAsgZqKP"
 
 static gchar *
 parse_server_response                   (const gchar       *response,
@@ -43,6 +44,7 @@ parse_server_response                   (const gchar       *response,
       rootid = "image";
       urlid  = "url";
       break;
+    case SERVICE_MOBYPICTURE:
     case SERVICE_TWITGOO:
       rootid = "rsp";
       urlid  = "mediaurl";
@@ -204,6 +206,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
   SharingPluginInterfaceSendResult retval;
   SharingEntry *entry;
   const GSList *l;
+  const gchar *servicename;
   TwitterPicService service = SERVICE_TWITPIC;
 
   retval = SHARING_SEND_SUCCESS;
@@ -213,8 +216,14 @@ twitpic_share_file                      (SharingTransfer *transfer,
   entry = sharing_transfer_get_entry (transfer);
   l = sharing_entry_get_media (entry);
 
-  if (g_strcmp0 (sharing_entry_get_option (entry, "service"), "twitgoo") == 0)
-    service = SERVICE_TWITGOO;
+  servicename = sharing_entry_get_option (entry, "service");
+  if (servicename)
+    {
+      if (g_str_equal (servicename, "twitgoo"))
+        service = SERVICE_TWITGOO;
+      else if (g_str_equal (servicename, "mobypicture"))
+        service = SERVICE_MOBYPICTURE;
+    }
 
   for (; l != NULL && retval == SHARING_SEND_SUCCESS; l = l->next)
     {
@@ -257,6 +266,10 @@ twitpic_share_file                      (SharingTransfer *transfer,
             case SERVICE_TWITPIC:
               sharing_http_add_req_multipart_data (http, "key", TWITPIC_API_KEY, -1, "text/plain");
               posturl = "http://api.twitpic.com/2/upload.xml";
+              break;
+            case SERVICE_MOBYPICTURE:
+              sharing_http_add_req_multipart_data (http, "key", MOBYPICTURE_API_KEY, -1, "text/plain");
+              posturl = "https://api.mobypicture.com/2.0/upload.xml";
               break;
             case SERVICE_TWITGOO:
               posturl = "http://twitgoo.com/api/upload";

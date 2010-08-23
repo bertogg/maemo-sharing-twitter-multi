@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 
 typedef enum {
   SERVICE_TWITPIC,
+  SERVICE_MOBYPICTURE,
   SERVICE_TWITGOO
 } TwitterPicService;
 
