@@ -25,6 +25,11 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+  SERVICE_TWITPIC,
+  SERVICE_TWITGOO
+} TwitterPicService;
+
 gboolean
 twitpic_account_setup                   (SharingAccount *account,
                                          GtkWindow      *parent);

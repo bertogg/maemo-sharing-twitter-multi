@@ -7,5 +7,12 @@
     <name>Twitpic</name>
     <icon type="post">@servicesdir@/twitpic-icon.png</icon>
     <icon type="setup">@servicesdir@/twitpic-icon.png</icon>
+    <options>
+      <option id="service" type="enumeration" default="twitpic">
+        <caption key="Service"/>
+        <value id="twitpic" key="Twitpic"/>
+        <value id="twitgoo" key="Twitgoo"/>
+      </option>
+    </options>
   </ui>
 </service>

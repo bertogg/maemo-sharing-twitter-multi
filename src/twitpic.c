@@ -27,26 +27,40 @@
 #define TWITPIC_API_KEY                 "43d219dfe0c80559511ded2e6bc432ad"
 
 static gchar *
-parse_twitpic_response                  (const gchar *response,
-                                         gsize        size)
+parse_server_response                   (const gchar       *response,
+                                         gsize              size,
+                                         TwitterPicService  service)
 {
   xmlDoc *doc;
+  const gchar *rootid, *urlid;
   gchar *url = NULL;
 
   g_return_val_if_fail (response != NULL, NULL);
 
+  switch (service)
+    {
+    case SERVICE_TWITPIC:
+      rootid = "image";
+      urlid  = "url";
+      break;
+    case SERVICE_TWITGOO:
+      rootid = "rsp";
+      urlid  = "mediaurl";
+      break;
+    }
+
   doc = xmlParseMemory (response, size);
   if (doc != NULL)
     {
-      xmlNode *iter, *image = NULL;
+      xmlNode *iter, *root = NULL;
 
-      for (iter = xmlDocGetRootElement (doc); iter && !image; iter = iter->next)
-        if (xmlStrEqual (iter->name, (xmlChar *) "image"))
-          image = iter;
+      for (iter = xmlDocGetRootElement (doc); iter && !root; iter = iter->next)
+        if (xmlStrEqual (iter->name, (xmlChar *) rootid))
+          root = iter;
 
-      if (image != NULL)
-        for (iter = image->xmlChildrenNode; iter && !url; iter = iter->next)
-          if (xmlStrEqual (iter->name, (xmlChar *) "url"))
+      if (root != NULL)
+        for (iter = root->xmlChildrenNode; iter && !url; iter = iter->next)
+          if (xmlStrEqual (iter->name, (xmlChar *) urlid))
             {
               xmlChar *s = xmlNodeGetContent (iter);
               url = g_strdup ((gchar *) s);
@@ -190,6 +204,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
   SharingPluginInterfaceSendResult retval;
   SharingEntry *entry;
   const GSList *l;
+  TwitterPicService service = SERVICE_TWITPIC;
 
   retval = SHARING_SEND_SUCCESS;
   *dead_mans_switch = FALSE;
@@ -197,6 +212,9 @@ twitpic_share_file                      (SharingTransfer *transfer,
 
   entry = sharing_transfer_get_entry (transfer);
   l = sharing_entry_get_media (entry);
+
+  if (g_strcmp0 (sharing_entry_get_option (entry, "service"), "twitgoo") == 0)
+    service = SERVICE_TWITGOO;
 
   for (; l != NULL && retval == SHARING_SEND_SUCCESS; l = l->next)
     {
@@ -214,6 +232,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
       if (path && mime && !sharing_entry_media_get_sent (media) &&
           twitter_account_validate (account))
         {
+          const gchar *posturl;
           gchar *hdr, *title;
           SharingHTTP *http = sharing_http_new ();
           SharingHTTPRunResponse httpret;
@@ -231,13 +250,28 @@ twitpic_share_file                      (SharingTransfer *transfer,
 
           sharing_http_set_progress_callback (http, upload_progress_cb, &data);
           sharing_http_add_req_multipart_file (http, "media", path, mime);
-          sharing_http_add_req_multipart_data (http, "key", TWITPIC_API_KEY, -1, "text/plain");
           sharing_http_add_req_multipart_data (http, "message", title, -1, "text/plain");
+
+          switch (service)
+            {
+            case SERVICE_TWITPIC:
+              sharing_http_add_req_multipart_data (http, "key", TWITPIC_API_KEY, -1, "text/plain");
+              posturl = "http://api.twitpic.com/2/upload.xml";
+              break;
+            case SERVICE_TWITGOO:
+              posturl = "http://twitgoo.com/api/upload";
+              break;
+            default:
+              g_return_val_if_reached (SHARING_SEND_ERROR_UNKNOWN);
+            }
+
           hdr = twitter_get_verify_credentials_header (account);
           sharing_http_add_req_header_line (http, hdr);
           g_free (hdr);
+
           sharing_http_add_req_header_line (http, "X-Auth-Service-Provider: " TWITTER_VERIFY_CREDENTIALS_URL);
-          httpret = sharing_http_run (http, "http://api.twitpic.com/2/upload.xml");
+          httpret = sharing_http_run (http, posturl);
+
           switch (httpret)
             {
             case SHARING_HTTP_RUNRES_SUCCESS:
@@ -247,7 +281,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
                 gchar *img_url;
 
                 body = sharing_http_get_res_body (http, &len);
-                img_url = parse_twitpic_response (body, len);
+                img_url = parse_server_response (body, len, service);
 
                 if (img_url != NULL)
                   {
