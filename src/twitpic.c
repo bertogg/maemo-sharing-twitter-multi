@@ -24,7 +24,7 @@
 #include <sharing-http.h>
 #include <libxml/parser.h>
 
-#define TWITPIC_API_KEY                 "43d219dfe0c80559511ded2e6bc432ad"
+#define TWITPIC_API_KEY                 "1f9ce28260728df0a40cafe3506a9407"
 
 static gchar *
 parse_server_response                   (const gchar       *response,
