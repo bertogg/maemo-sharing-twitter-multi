@@ -33,14 +33,26 @@
 #define CONSUMER_SECRET           "psF3jiC2uMVWG7P1sd2bVEhFmHmWJOUTcbvevqbrcc"
 
 static GHashTable *
-parse_reply                             (const gchar *buffer)
+parse_reply                             (const gchar *buffer,
+                                         gsize        len)
 {
   GHashTable *hash;
   gint i;
+  gchar *buf2;
   gchar **lines;
 
   hash = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
-  lines = g_strsplit (buffer, "&", 0);
+
+  if (len < 3)
+    return hash;
+
+  /* According to the doc, buffer might not be NULL terminated.
+     I don't think this is likely here, but it's better to avoid surprises */
+  buf2 = g_malloc (len + 1);
+  memcpy (buf2, buffer, len);
+  buf2[len] = '\0';
+
+  lines = g_strsplit (buf2, "&", 0);
 
   for (i = 0; lines[i] != NULL; i++)
     {
@@ -62,6 +74,8 @@ parse_reply                             (const gchar *buffer)
       g_strfreev (line);
     }
   g_strfreev (lines);
+
+  g_free (buf2);
 
   return hash;
 }
@@ -277,7 +291,7 @@ get_twitter_access_token                (gchar  *request_token,
           const gchar *reply, *token, *secret, *name;
 
           reply = sharing_http_get_res_body (http, &len);
-          t = parse_reply (reply);
+          t = parse_reply (reply, len);
 
           token  = g_hash_table_lookup (t, "oauth_token");
           secret = g_hash_table_lookup (t, "oauth_token_secret");
@@ -323,7 +337,7 @@ get_twitter_request_token               (gchar **token,
       const gchar *reply, *oauth_token, *oauth_token_secret;
 
       reply = sharing_http_get_res_body (http, &len);
-      t = parse_reply (reply);
+      t = parse_reply (reply, len);
 
       oauth_token = g_hash_table_lookup (t, "oauth_token");
       oauth_token_secret = g_hash_table_lookup (t, "oauth_token_secret");
