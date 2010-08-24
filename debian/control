@@ -14,7 +14,7 @@ XB-Bugtracker: mailto:agarcia@igalia.com
 Description: Twitter photo sharing plugin for the Nokia N900
  This plugin allows you to upload pictures to Twitter using the
  sharing service.
- It currently supports Twitpic, Twitgoo and Mobypicture.
+ It currently supports Twitpic, Twitgoo, Mobypicture and img.ly
 XB-Maemo-Icon-26:
  iVBORw0KGgoAAAANSUhEUgAAABoAAAAaCAYAAACpSkzOAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A
  /wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9oIFxISAOWZtsMAAANqSURBVEjH
