@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Alberto Garcia <agarcia@igalia.com>
 XB-Homepage: http://gitorious.org/maemo-sharing-twitter-multi
 XB-Bugtracker: mailto:agarcia@igalia.com
-Build-Depends: debhelper (>= 5.0.0), cdbs, libhildon1-dev, libconic0-dev, libosso-dev, libsharing-plugin-dev, libhildonmime-dev, liboauth-dev
+Build-Depends: debhelper (>= 5.0.0), cdbs, libhildon1-dev, libconic0-dev, libosso-dev, libsharing-plugin-dev, libhildonmime-dev, liboauth-dev, libcurl3-dev, libssl-dev
 Standards-Version: 3.8.0
 
 Package: sharing-twitter-multi
