@@ -4,6 +4,9 @@
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/class/autotools.mk
 
+DEB_DH_INSTALL_SOURCEDIR=debian/tmp
+DEB_DESTDIR=$(CURDIR)/debian/tmp
+
 makebuilddir/maemo-sharing-twitter-multi:: configure
 
 configure: configure.ac Makefile.am src/Makefile.am data/Makefile.am
