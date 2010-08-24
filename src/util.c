@@ -409,6 +409,8 @@ twitter_account_set_pin                 (SharingAccount *account,
   g_return_if_fail (account != NULL);
 
   sharing_account_set_param (account, PARAM_PIN, pin);
+  sharing_account_set_param (account, PARAM_ACCESS_TOKEN, NULL);
+  sharing_account_set_param (account, PARAM_ACCESS_SECRET, NULL);
 }
 
 gboolean
