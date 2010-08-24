@@ -261,6 +261,11 @@ twitpic_share_file                      (SharingTransfer *transfer,
           data.size = sharing_entry_media_get_size (media);
 
           title = sharing_entry_media_get_title (media);
+
+          /* If the title field is empty, use the description instead */
+          if (!title)
+            title = g_strdup (sharing_entry_media_get_desc (media));
+
           if (title)
             g_strstrip (title);
           else
