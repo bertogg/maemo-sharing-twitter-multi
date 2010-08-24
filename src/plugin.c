@@ -68,7 +68,7 @@ sharing_plugin_interface_account_validate
   if (twitmulti_account_validate (account, dead_mans_switch))
     return SHARING_ACCOUNT_VALIDATE_SUCCESS;
   else
-    return SHARING_ACCOUNT_VALIDATE_ERROR_UNKNOWN;
+    return SHARING_ACCOUNT_VALIDATE_FAILED;
 }
 
 SharingPluginInterfaceEditAccountResult
