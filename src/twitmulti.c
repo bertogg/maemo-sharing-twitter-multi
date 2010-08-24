@@ -305,8 +305,20 @@ twitmulti_share_file                    (SharingTransfer *transfer,
       mime = sharing_entry_media_get_mime (media);
       account = sharing_entry_get_account (entry);
 
-      if (path && mime && !sharing_entry_media_get_sent (media) &&
-          twitter_account_validate (account))
+      if (sharing_entry_media_get_sent (media))
+        {
+          /* Do nothing, this file has already been sent */
+        }
+      else if (!path || !mime)
+        {
+          /* This is not supposed to happen... */
+          retval = SHARING_SEND_ERROR_UNKNOWN;
+        }
+      else if (!twitter_account_validate (account))
+        {
+          retval = SHARING_SEND_ERROR_AUTH;
+        }
+      else
         {
           const gchar *posturl;
           gchar *hdr, *title;
