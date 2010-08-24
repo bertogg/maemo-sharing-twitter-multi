@@ -16,8 +16,8 @@
  * along with this software. If not, see <http://www.gnu.org/licenses/>
  */
 
-#ifndef __TWITPIC_H__
-#define __TWITPIC_H__
+#ifndef __TWITMULTI_H__
+#define __TWITMULTI_H__
 
 #include <hildon/hildon.h>
 #include <sharing-plugin-interface.h>
@@ -33,24 +33,24 @@ typedef enum {
 } TwitterPicService;
 
 gboolean
-twitpic_account_setup                   (SharingAccount *account,
+twitmulti_account_setup                 (SharingAccount *account,
                                          GtkWindow      *parent);
 
 gboolean
-twitpic_account_validate                (SharingAccount *account,
+twitmulti_account_validate              (SharingAccount *account,
                                          gboolean       *dead_mans_switch);
 
 SharingPluginInterfaceSendResult
-twitpic_share_file                      (SharingTransfer *transfer,
+twitmulti_share_file                    (SharingTransfer *transfer,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch);
 
 SharingPluginInterfaceEditAccountResult
-twitpic_account_edit                    (GtkWindow       *parent,
+twitmulti_account_edit                  (GtkWindow       *parent,
                                          SharingAccount  *account,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch);
 
 G_END_DECLS
 
-#endif /* __TWITPIC_H__ */
+#endif /* __TWITMULTI_H__ */

@@ -16,7 +16,7 @@
  * along with this software. If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "twitpic.h"
+#include "twitmulti.h"
 #include "util.h"
 
 #include <hildon-mime.h>
@@ -115,7 +115,7 @@ register_account_clicked                (GtkWidget *button,
 }
 
 static gboolean
-twitpic_account_enter_pin               (SharingAccount *account,
+twitmulti_account_enter_pin             (SharingAccount *account,
                                          GtkWindow      *parent)
 {
   gint response;
@@ -153,7 +153,7 @@ twitpic_account_enter_pin               (SharingAccount *account,
 }
 
 gboolean
-twitpic_account_setup                   (SharingAccount *account,
+twitmulti_account_setup                 (SharingAccount *account,
                                          GtkWindow      *parent)
 {
   gint response;
@@ -163,7 +163,7 @@ twitpic_account_setup                   (SharingAccount *account,
 
   d = gtk_dialog_new ();
   vbox = GTK_CONTAINER (GTK_DIALOG (d)->vbox);
-  gtk_window_set_title (GTK_WINDOW (d), "Account setup - Twitpic");
+  gtk_window_set_title (GTK_WINDOW (d), "Account setup - Twitter");
   gtk_window_set_transient_for (GTK_WINDOW (d), parent);
 
   label = gtk_label_new ("You need to register a Twitter account using the web page.\n"
@@ -187,7 +187,7 @@ twitpic_account_setup                   (SharingAccount *account,
       ConIcConnection *con = con_ic_connection_new ();
       open_auth_url (account, parent, con);
       g_object_unref (con);
-      success = twitpic_account_enter_pin (account, parent);
+      success = twitmulti_account_enter_pin (account, parent);
     }
 
   return success;
@@ -195,7 +195,7 @@ twitpic_account_setup                   (SharingAccount *account,
 
 
 gboolean
-twitpic_account_validate                (SharingAccount *account,
+twitmulti_account_validate              (SharingAccount *account,
                                          gboolean       *dead_mans_switch)
 {
   *dead_mans_switch = FALSE;
@@ -223,7 +223,7 @@ upload_progress_cb                      (SharingHTTP *http,
 }
 
 SharingPluginInterfaceSendResult
-twitpic_share_file                      (SharingTransfer *transfer,
+twitmulti_share_file                    (SharingTransfer *transfer,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
@@ -377,7 +377,7 @@ twitpic_share_file                      (SharingTransfer *transfer,
 }
 
 SharingPluginInterfaceEditAccountResult
-twitpic_account_edit                    (GtkWindow       *parent,
+twitmulti_account_edit                  (GtkWindow       *parent,
                                          SharingAccount  *account,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
@@ -389,7 +389,7 @@ twitpic_account_edit                    (GtkWindow       *parent,
   g_return_val_if_fail (account && dead_mans_switch, SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN);
 
   d = gtk_dialog_new ();
-  gtk_window_set_title (GTK_WINDOW (d), "Edit account - Twitpic");
+  gtk_window_set_title (GTK_WINDOW (d), "Edit account - Twitter");
   gtk_window_set_transient_for (GTK_WINDOW (d), parent);
   gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_REMOVE, RESPONSE_REMOVE);
   gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_EDIT, RESPONSE_EDIT);
@@ -408,7 +408,7 @@ twitpic_account_edit                    (GtkWindow       *parent,
     {
     case RESPONSE_EDIT:
       open_auth_url (account, parent, con);
-      if (twitpic_account_enter_pin (account, parent))
+      if (twitmulti_account_enter_pin (account, parent))
         {
           return SHARING_EDIT_ACCOUNT_SUCCESS;
         }

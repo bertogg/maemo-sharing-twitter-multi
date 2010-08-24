@@ -16,7 +16,7 @@
  * along with this software. If not, see <http://www.gnu.org/licenses/>
  */
 
-#include "twitpic.h"
+#include "twitmulti.h"
 
 #include <hildon/hildon.h>
 #include <sharing-plugin-interface.h>
@@ -43,7 +43,7 @@ sharing_plugin_interface_send           (SharingTransfer *transfer,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
-  return twitpic_share_file (transfer, con, dead_mans_switch);
+  return twitmulti_share_file (transfer, con, dead_mans_switch);
 }
 
 SharingPluginInterfaceAccountSetupResult
@@ -52,7 +52,7 @@ sharing_plugin_interface_account_setup  (GtkWindow       *parent,
                                          SharingAccount **worked_on,
                                          osso_context_t  *osso)
 {
-  if (twitpic_account_setup (*worked_on, parent))
+  if (twitmulti_account_setup (*worked_on, parent))
     return SHARING_ACCOUNT_SETUP_SUCCESS;
   else
     return SHARING_ACCOUNT_SETUP_ERROR_UNKNOWN;
@@ -65,7 +65,7 @@ sharing_plugin_interface_account_validate
                                          gboolean        *cont,
                                          gboolean        *dead_mans_switch)
 {
-  if (twitpic_account_validate (account, dead_mans_switch))
+  if (twitmulti_account_validate (account, dead_mans_switch))
     return SHARING_ACCOUNT_VALIDATE_SUCCESS;
   else
     return SHARING_ACCOUNT_VALIDATE_ERROR_UNKNOWN;
@@ -77,5 +77,5 @@ sharing_plugin_interface_edit_account   (GtkWindow       *parent,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
-  return twitpic_account_edit (parent, account, con, dead_mans_switch);
+  return twitmulti_account_edit (parent, account, con, dead_mans_switch);
 }

@@ -10,7 +10,7 @@
 plugins_LTLIBRARIES = libtwittermulti.la
 
 libtwittermulti_la_SOURCES = plugin.c \
-	twitpic.c twitpic.h \
+	twitmulti.c twitmulti.h \
 	util.c util.h
 
 libtwittermulti_la_CFLAGS = $(EXTRA_CFLAGS)
