@@ -21,6 +21,7 @@
 #include <oauth.h>
 #include <string.h>
 #include <sharing-http.h>
+#include <conicconnectionevent.h>
 
 #define PARAM_ACCESS_TOKEN        "twitter-access-token"
 #define PARAM_ACCESS_SECRET       "twitter-access-secret"
@@ -348,6 +349,7 @@ typedef struct {
   gchar *secret;
   TwitterGetAuthUrlCb callback;
   gpointer cbdata;
+  gboolean online;
 } TwitterGetAuthUrlData;
 
 static gboolean
@@ -373,13 +375,26 @@ static gpointer
 twitter_get_auth_url_thread             (gpointer data)
 {
   TwitterGetAuthUrlData *d = data;
-  get_twitter_request_token (&(d->token), &(d->secret));
+  if (d->online)
+    get_twitter_request_token (&(d->token), &(d->secret));
   gdk_threads_add_idle (twitter_get_auth_url_idle, d);
   return NULL;
 }
 
+static void
+twitter_get_auth_url_connection         (ConIcConnection      *conn,
+                                         ConIcConnectionEvent *event,
+                                         gpointer              data)
+{
+  TwitterGetAuthUrlData *d = data;
+  g_signal_handlers_disconnect_by_func (conn, twitter_get_auth_url_connection, data);
+  d->online = con_ic_connection_event_get_status (event) == CON_IC_STATUS_CONNECTED;
+  g_thread_create (twitter_get_auth_url_thread, d, FALSE, NULL);
+}
+
 void
 twitter_get_auth_url                    (SharingAccount      *account,
+                                         ConIcConnection     *con,
                                          TwitterGetAuthUrlCb  callback,
                                          gpointer             cbdata)
 {
@@ -392,7 +407,9 @@ twitter_get_auth_url                    (SharingAccount      *account,
   d->callback = callback;
   d->cbdata   = cbdata;
 
-  g_thread_create (twitter_get_auth_url_thread, d, FALSE, NULL);
+  g_signal_connect (con, "connection-event",
+                    G_CALLBACK (twitter_get_auth_url_connection), d);
+  con_ic_connection_connect (con, CON_IC_CONNECT_FLAG_NONE);
 }
 
 void

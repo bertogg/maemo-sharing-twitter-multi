@@ -21,6 +21,7 @@
 
 #include <glib.h>
 #include <sharing-plugin-interface.h>
+#include <conicconnection.h>
 
 G_BEGIN_DECLS
 
@@ -36,6 +37,7 @@ typedef void
 
 void
 twitter_get_auth_url                    (SharingAccount      *account,
+                                         ConIcConnection     *con,
                                          TwitterGetAuthUrlCb  callback,
                                          gpointer             cbdata);
 

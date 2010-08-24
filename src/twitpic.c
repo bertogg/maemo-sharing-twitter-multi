@@ -86,8 +86,9 @@ open_auth_url_cb                        (const gchar *url,
 }
 
 static void
-open_auth_url                           (SharingAccount *account,
-                                         GtkWindow      *parent)
+open_auth_url                           (SharingAccount  *account,
+                                         GtkWindow       *parent,
+                                         ConIcConnection *con)
 {
   GtkWidget *d;
 
@@ -99,7 +100,7 @@ open_auth_url                           (SharingAccount *account,
                      gtk_label_new ("Opening web browser, please wait ..."));
   gtk_widget_show_all (d);
 
-  twitter_get_auth_url (account, open_auth_url_cb, d);
+  twitter_get_auth_url (account, con, open_auth_url_cb, d);
 
   while (gtk_dialog_run (GTK_DIALOG (d)) != GTK_RESPONSE_ACCEPT);
   gtk_widget_destroy (d);
@@ -183,7 +184,9 @@ twitpic_account_setup                   (SharingAccount *account,
 
   if (response == GTK_RESPONSE_ACCEPT)
     {
-      open_auth_url (account, parent);
+      ConIcConnection *con = con_ic_connection_new ();
+      open_auth_url (account, parent, con);
+      g_object_unref (con);
       success = twitpic_account_enter_pin (account, parent);
     }
 
@@ -404,7 +407,7 @@ twitpic_account_edit                    (GtkWindow       *parent,
   switch (response)
     {
     case RESPONSE_EDIT:
-      open_auth_url (account, parent);
+      open_auth_url (account, parent, con);
       if (twitpic_account_enter_pin (account, parent))
         {
           return SHARING_EDIT_ACCOUNT_SUCCESS;
