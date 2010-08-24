@@ -1,6 +1,6 @@
 #
 # This file is part of maemo-sharing-twitter-multi and is published under
-# the GNU GPLv3.
+# the GNU LGPLv3.
 #
 # Copyright (C) 2010 Igalia, S.L.
 #
