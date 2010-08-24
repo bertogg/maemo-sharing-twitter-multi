@@ -2,35 +2,47 @@ Source: maemo-sharing-twitter-multi
 Section: user/multimedia
 Priority: optional
 Maintainer: Alberto Garcia <agarcia@igalia.com>
+XB-Homepage: http://gitorious.org/maemo-sharing-twitter-multi
+XB-Bugtracker: mailto:agarcia@igalia.com
 Build-Depends: debhelper (>= 5.0.0), cdbs, libhildon1-dev, libconic0-dev, libosso-dev, libsharing-plugin-dev, libhildonmime-dev, liboauth-dev
 Standards-Version: 3.8.0
 
 Package: maemo-sharing-twitter-multi
-Section: user/multimedia
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, sharing-manager
 XB-Maemo-Display-Name: Sharing plugin for Twitter
-XB-Bugtracker: mailto:agarcia@igalia.com
-Description: Twitter photo sharing plugin for the Nokia N900
+Description: Upload photos to Twitter using a variety of services
  This plugin allows you to upload pictures to Twitter using the
- sharing service.
+ sharing service of the Nokia N900.
  It currently supports Twitpic, Twitgoo, Mobypicture, img.ly and Posterous
 XB-Maemo-Icon-26:
- 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
+ iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A
+ /wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9oIFxEvMdzpQB4AAAX2SURBVGje
+ zZpdjFx1GcZ/z39mP4Xtx9I2pa0twXBBYkBDakCRhhhiBGuK315qwoWJHwkYYowSEtE0KFxpQoyK
+ RoMRYghe+AGmGqKWGKWCJELWKq2Wdmm6bou7s1/v48U5Z+bsTmd3Zmenu28yF3v2zDnv83+/nuf/
+ H7EKi4gkSQC2I6Vk1snUgdNVYKekPbavA3YAM8AY8IKkcUkTbESLiKtt32v77xHhsuV/h+0nbL/X
+ dv9Gc/5W23+4iMP1S6X/XbB9f0QMbwjnbd8SEa80L/hi9yO7GhHhyOzrtivr7fzuiHim2eOLW35b
+ lFAeXNcijoi7gEcazQYZeHoCHjkFp2ahKrh5E3xhD2ztAzu7NX/ua8CuXneo1ML57cCHC+chc/47
+ r8HnxuBfNZg3TC/AL8/BnS/B8RpIkLdXS9oJfLDXEbgoAElbJL3L2ZIK4Ngb8NBJuKwCScV9UBFc
+ mIf7/gnh+vdlG0kfXRcAwKjtwXz1AXhsHIaWKctTM/DchaY6enuvAVRbFPBmSeQRAOBErTVagDnD
+ mdlFUQTYafseYGCZZoGkWdunJb0o6VjXAIq0KegCZDm/Yudq8s1DwIMtO4hEvlAh6Q3bp22/BDws
+ 6dluUsjNL+tZu0ZSAkaAa2wfAh6PiC91E4E1adFqA/WSe5x/aQfwlYhQSumrlwSAgbnIOlEtOuwk
+ gj5BpTF0LKnf9hcj4oWU0lM9BzAT8JPX4chko522ayMVuGkE3rkJtvfXE9bAMHB3RBxNKY33DIAE
+ C4bj0zA2tbroPXkWbt0M9+2DKwfArjeSdwPXAU93UsSrAlEV9KfOPwMJNlXh2Ul44ETjeZJycuLb
+ bVd7CmAtbLgCRyfh5ammdv62Vux2QwEo7B+1pla7vRXx3JAALktNrbbW6SBbH/XnLI32jzQN1DFJ
+ 0ds50AXrN1kXG6rAZ3bDYKpri+KW30qa7xkAO+saiQbV7sT5fsGeAXj/KHxkW/15OcvQpO3f9DwC
+ /YLbR7NhNNfhJO5PsHcQ9g2WeWC9aL8l6XjPJ3FV8NY3wYHNa0eibP8O+Lak2UtSxAtrxE5zHfK8
+ pE9K+s9q6PQiMdNtka7gsHOnnbPRkPQj4OblUmfZFFqqxnqpB4qMsT0B/AI4LOnFbjVxLBU2/bqI
+ yimnj2E6Oo9WabFqtodsX297b1cAbP83r6P6um/tWx5ALeCVqUa02gWRc38DV0q6U9IPgcdsv6+b
+ bZXzS1Po6sHWPF95dP44CUfPd5Zyeccp0igvBW4EHrX9idWm0JSkV8sX9o8sL+wFvD4HX3sVfj2x
+ +mIoUsr2NuBB2zd2vLVoe9T294CDhWadM9zyfJYqraZtEbSBBNv6YN/QyrUDcHkF3rMlG4J54RkX
+ 8pgnbN+VUppoG0B+AnMPcLi+twg8fBK+exoGtHKKdNp2awF3XAEPXJUNxYIL5SD2S/pT2ymUUgrg
+ OeBceSh8fAdsrTZa1EoKrZPPUAV+fhYOn1hUQ8UyHMxPiDoaZMdsHykYlZ2lxad3ZdGIHgy24Qo8
+ Pg5n5pr2Zd4hqTNFllKalPRTSefLG7l3jGakzT2azhXBseY91l2rUmT5udevilDa2e70Z3dnpG2h
+ hyCWUJpwixctCyCvhbuB0y4pjG19cP8+OHQFzHht08nADZc37Z+epEXprchGU0onbX+o2PkrJs1I
+ Fb68F775liwqs9F9NKYX4FM7YXO1pAoy+30rsts2RbP9AeDJUihdlNlMwI/PwM/OwvgsTYK2HZs3
+ fGw73PvmhiIDlL/v+pTSX7sCkM+HQ8CjkkZKKbpof3ZsGv72P/j3DEwttKcRNlXgwBa4dngRPyqe
+ +n3bn08pnV+bnYOIA7b/kh+p1s9d2zzMbNvyZ7+c/ypgzUXIVbYfsn229MJYcgC+Kr9Lx7THI+K2
+ nqkQ2322b7L9DdsnSqvm9s+W61aKZNj2U7ZvaIsArkFKDUnaYftaSbfZ3g9cA4wWbXAlDZzfc8r2
+ EUk/sP3nlNK5SwJgiTNVoGK7+DmOvExvVWPzpxAC8ymluU7e+X8O7YwYBMlRxwAAAABJRU5ErkJg
+ gg==
