@@ -471,6 +471,9 @@ twitter_account_validate                (SharingAccount *account)
       g_free (pin);
     }
 
+  if (!valid_account)
+    sharing_account_set_username (account, "(unconfigured)");
+
   return valid_account;
 }
 
