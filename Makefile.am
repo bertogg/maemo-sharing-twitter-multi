@@ -1,5 +1,5 @@
 #
-# This file is part of maemo-sharing-twitter-multi and is published under
+# This file is part of sharing-twitter-multi and is published under
 # the GNU LGPLv3.
 #
 # Copyright (C) 2010 Igalia, S.L.
