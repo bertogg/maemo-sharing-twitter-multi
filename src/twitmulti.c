@@ -247,24 +247,11 @@ upload_progress_cb                      (SharingHTTP *http,
   return TRUE;
 }
 
-SharingPluginInterfaceSendResult
-twitmulti_share_file                    (SharingTransfer *transfer,
-                                         ConIcConnection *con,
-                                         gboolean        *dead_mans_switch)
+TwitterPicService
+get_twitter_pic_service                 (SharingEntry *entry)
 {
-  SharingPluginInterfaceSendResult retval;
-  SharingEntry *entry;
-  const GSList *l;
   const gchar *servicename;
-  gboolean post_to_twitter = TRUE;
   TwitterPicService service = SERVICE_TWITPIC;
-
-  retval = SHARING_SEND_SUCCESS;
-  *dead_mans_switch = FALSE;
-  sharing_transfer_set_progress (transfer, 0.0);
-
-  entry = sharing_transfer_get_entry (transfer);
-  l = sharing_entry_get_media (entry);
 
   servicename = sharing_entry_get_option (entry, "service");
   if (servicename)
@@ -278,6 +265,29 @@ twitmulti_share_file                    (SharingTransfer *transfer,
       else if (g_str_equal (servicename, "posterous"))
         service = SERVICE_POSTEROUS;
     }
+
+  return service;
+}
+
+SharingPluginInterfaceSendResult
+twitmulti_share_file                    (SharingTransfer *transfer,
+                                         ConIcConnection *con,
+                                         gboolean        *dead_mans_switch)
+{
+  SharingPluginInterfaceSendResult retval;
+  SharingEntry *entry;
+  const GSList *l;
+  gboolean post_to_twitter = TRUE;
+  TwitterPicService service = SERVICE_TWITPIC;
+
+  retval = SHARING_SEND_SUCCESS;
+  *dead_mans_switch = FALSE;
+  sharing_transfer_set_progress (transfer, 0.0);
+
+  entry = sharing_transfer_get_entry (transfer);
+  l = sharing_entry_get_media (entry);
+
+  service = get_twitter_pic_service (entry);
 
   if (g_strcmp0 (sharing_entry_get_option (entry, "posttotwitter"), "no") == 0)
     post_to_twitter = FALSE;
