@@ -401,17 +401,29 @@ twitmulti_share_file                    (SharingTransfer *transfer,
   return retval;
 }
 
+static gboolean
+clear_switch                            (gpointer data)
+{
+  gboolean *dead_mans_switch = data;
+  *dead_mans_switch = FALSE;
+  return TRUE;
+}
+
 SharingPluginInterfaceEditAccountResult
 twitmulti_account_edit                  (GtkWindow       *parent,
                                          SharingAccount  *account,
                                          ConIcConnection *con,
                                          gboolean        *dead_mans_switch)
 {
+  SharingPluginInterfaceEditAccountResult retval = SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN;
   gint response;
   GtkWidget *d, *label;
   enum { RESPONSE_EDIT, RESPONSE_REMOVE };
+  guint timeout_id;
 
-  g_return_val_if_fail (account && dead_mans_switch, SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN);
+  g_return_val_if_fail (account && dead_mans_switch, retval);
+
+  timeout_id = gdk_threads_add_timeout_seconds (20, clear_switch, dead_mans_switch);
 
   d = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (d), "Edit account - Twitter");
@@ -435,17 +447,24 @@ twitmulti_account_edit                  (GtkWindow       *parent,
       if (open_auth_url (account, parent, con) &&
           twitmulti_account_enter_pin (account, parent))
         {
-          return SHARING_EDIT_ACCOUNT_SUCCESS;
+          retval = SHARING_EDIT_ACCOUNT_SUCCESS;
         }
       else
         {
-          return SHARING_EDIT_ACCOUNT_CANCELLED;
+          retval = SHARING_EDIT_ACCOUNT_CANCELLED;
         }
+      break;
     case RESPONSE_REMOVE:
-      return SHARING_EDIT_ACCOUNT_DELETE;
+      retval = SHARING_EDIT_ACCOUNT_DELETE;
+      break;
     case GTK_RESPONSE_DELETE_EVENT:
-      return SHARING_EDIT_ACCOUNT_NOT_STARTED;
+      retval = SHARING_EDIT_ACCOUNT_NOT_STARTED;
+      break;
+    default:
+      g_return_val_if_reached (SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN);
     }
 
-  return SHARING_EDIT_ACCOUNT_ERROR_UNKNOWN;
+  g_source_remove (timeout_id);
+
+  return retval;
 }
