@@ -50,6 +50,8 @@ parse_server_response                   (const gchar       *response,
       rootid = "rsp";
       urlid  = "mediaurl";
       break;
+    default:
+      g_return_val_if_reached (NULL);
     }
 
   doc = xmlParseMemory (response, size);
