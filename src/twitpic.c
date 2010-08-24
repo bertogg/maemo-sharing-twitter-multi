@@ -41,6 +41,7 @@ parse_server_response                   (const gchar       *response,
     {
     case SERVICE_TWITPIC:
     case SERVICE_IMGLY:
+    case SERVICE_POSTEROUS:
       rootid = "image";
       urlid  = "url";
       break;
@@ -226,6 +227,8 @@ twitpic_share_file                      (SharingTransfer *transfer,
         service = SERVICE_MOBYPICTURE;
       else if (g_str_equal (servicename, "imgly"))
         service = SERVICE_IMGLY;
+      else if (g_str_equal (servicename, "posterous"))
+        service = SERVICE_POSTEROUS;
     }
 
   if (g_strcmp0 (sharing_entry_get_option (entry, "posttotwitter"), "no") == 0)
@@ -282,6 +285,9 @@ twitpic_share_file                      (SharingTransfer *transfer,
               break;
             case SERVICE_IMGLY:
               posturl = "http://img.ly/api/2/upload.xml";
+              break;
+            case SERVICE_POSTEROUS:
+              posturl = "https://posterous.com/api2/upload.xml";
               break;
             default:
               g_return_val_if_reached (SHARING_SEND_ERROR_UNKNOWN);
