@@ -82,15 +82,16 @@ open_auth_url_cb                        (const gchar *url,
 {
   if (url)
     hildon_uri_open (url, NULL, NULL);
-  gtk_dialog_response (GTK_DIALOG (data), GTK_RESPONSE_ACCEPT);
+  gtk_dialog_response (GTK_DIALOG (data), url ? GTK_RESPONSE_YES : GTK_RESPONSE_NO);
 }
 
-static void
+static gboolean
 open_auth_url                           (SharingAccount  *account,
                                          GtkWindow       *parent,
                                          ConIcConnection *con)
 {
   GtkWidget *d;
+  gboolean response;
 
   d = gtk_dialog_new ();
   gtk_window_set_title (GTK_WINDOW (d), "Opening web browser ...");
@@ -102,8 +103,15 @@ open_auth_url                           (SharingAccount  *account,
 
   twitter_get_auth_url (account, con, open_auth_url_cb, d);
 
-  while (gtk_dialog_run (GTK_DIALOG (d)) != GTK_RESPONSE_ACCEPT);
+  do
+    {
+      response = gtk_dialog_run (GTK_DIALOG (d));
+    }
+  while (response != GTK_RESPONSE_YES && response != GTK_RESPONSE_NO);
+
   gtk_widget_destroy (d);
+
+  return (response == GTK_RESPONSE_YES);
 }
 
 static void
@@ -185,9 +193,9 @@ twitmulti_account_setup                 (SharingAccount *account,
   if (response == GTK_RESPONSE_ACCEPT)
     {
       ConIcConnection *con = con_ic_connection_new ();
-      open_auth_url (account, parent, con);
+      if (open_auth_url (account, parent, con))
+        success = twitmulti_account_enter_pin (account, parent);
       g_object_unref (con);
-      success = twitmulti_account_enter_pin (account, parent);
     }
 
   return success;
@@ -407,8 +415,8 @@ twitmulti_account_edit                  (GtkWindow       *parent,
   switch (response)
     {
     case RESPONSE_EDIT:
-      open_auth_url (account, parent, con);
-      if (twitmulti_account_enter_pin (account, parent))
+      if (open_auth_url (account, parent, con) &&
+          twitmulti_account_enter_pin (account, parent))
         {
           return SHARING_EDIT_ACCOUNT_SUCCESS;
         }

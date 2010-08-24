@@ -357,7 +357,7 @@ twitter_get_auth_url_idle               (gpointer data)
 {
   TwitterGetAuthUrlData *d = data;
   gchar *url = NULL;
-  if (d->token)
+  if (d->online && get_twitter_request_token (&(d->token), &(d->secret)))
     {
       url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", d->token, NULL);
       sharing_account_set_param (d->account, PARAM_REQUEST_TOKEN, d->token);
@@ -371,16 +371,6 @@ twitter_get_auth_url_idle               (gpointer data)
   return FALSE;
 }
 
-static gpointer
-twitter_get_auth_url_thread             (gpointer data)
-{
-  TwitterGetAuthUrlData *d = data;
-  if (d->online)
-    get_twitter_request_token (&(d->token), &(d->secret));
-  gdk_threads_add_idle (twitter_get_auth_url_idle, d);
-  return NULL;
-}
-
 static void
 twitter_get_auth_url_connection         (ConIcConnection      *conn,
                                          ConIcConnectionEvent *event,
@@ -389,7 +379,7 @@ twitter_get_auth_url_connection         (ConIcConnection      *conn,
   TwitterGetAuthUrlData *d = data;
   g_signal_handlers_disconnect_by_func (conn, twitter_get_auth_url_connection, data);
   d->online = con_ic_connection_event_get_status (event) == CON_IC_STATUS_CONNECTED;
-  g_thread_create (twitter_get_auth_url_thread, d, FALSE, NULL);
+  gdk_threads_add_timeout (500, twitter_get_auth_url_idle, d);
 }
 
 void
