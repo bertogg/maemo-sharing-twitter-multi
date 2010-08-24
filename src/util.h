@@ -30,8 +30,14 @@ G_BEGIN_DECLS
 #define TWITTER_UPDATE_STATUS_URL       "https://api.twitter.com/1/statuses/update.xml"
 #define TWITTER_VERIFY_CREDENTIALS_URL  "https://api.twitter.com/1/account/verify_credentials.json"
 
-gchar *
-twitter_get_auth_url                    (SharingAccount *account);
+typedef void
+(*TwitterGetAuthUrlCb)                  (const gchar *url,
+                                         gpointer     data);
+
+void
+twitter_get_auth_url                    (SharingAccount      *account,
+                                         TwitterGetAuthUrlCb  callback,
+                                         gpointer             cbdata);
 
 gboolean
 twitter_account_validate                (SharingAccount *account);

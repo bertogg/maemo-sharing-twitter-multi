@@ -77,21 +77,38 @@ parse_server_response                   (const gchar       *response,
 }
 
 static void
-open_auth_url                           (SharingAccount *account)
+open_auth_url_cb                        (const gchar *url,
+                                         gpointer     data)
 {
-  gchar *url = twitter_get_auth_url (account);
   if (url)
-    {
-      hildon_uri_open (url, NULL, NULL);
-      g_free (url);
-    }
+    hildon_uri_open (url, NULL, NULL);
+  gtk_dialog_response (GTK_DIALOG (data), GTK_RESPONSE_ACCEPT);
 }
 
 static void
-register_account_clicked                (GtkWidget      *button,
-                                         SharingAccount *account)
+open_auth_url                           (SharingAccount *account,
+                                         GtkWindow      *parent)
 {
-  open_auth_url (account);
+  GtkWidget *d;
+
+  d = gtk_dialog_new ();
+  gtk_window_set_title (GTK_WINDOW (d), "Opening web browser ...");
+  gtk_window_set_transient_for (GTK_WINDOW (d), parent);
+  hildon_gtk_window_set_progress_indicator (GTK_WINDOW (d), TRUE);
+  gtk_container_add (GTK_CONTAINER (GTK_DIALOG (d)->vbox),
+                     gtk_label_new ("Opening web browser, please wait ..."));
+  gtk_widget_show_all (d);
+
+  twitter_get_auth_url (account, open_auth_url_cb, d);
+
+  while (gtk_dialog_run (GTK_DIALOG (d)) != GTK_RESPONSE_ACCEPT);
+  gtk_widget_destroy (d);
+}
+
+static void
+register_account_clicked                (GtkWidget *button,
+                                         gpointer   data)
+{
   gtk_dialog_response (GTK_DIALOG (gtk_widget_get_toplevel (button)),
                        GTK_RESPONSE_ACCEPT);
 }
@@ -164,8 +181,11 @@ twitpic_account_setup                   (SharingAccount *account,
   response = gtk_dialog_run (GTK_DIALOG (d));
   gtk_widget_destroy (d);
 
-  if (response != GTK_RESPONSE_DELETE_EVENT)
-    success = twitpic_account_enter_pin (account, parent);
+  if (response == GTK_RESPONSE_ACCEPT)
+    {
+      open_auth_url (account, parent);
+      success = twitpic_account_enter_pin (account, parent);
+    }
 
   return success;
 }
@@ -384,7 +404,7 @@ twitpic_account_edit                    (GtkWindow       *parent,
   switch (response)
     {
     case RESPONSE_EDIT:
-      open_auth_url (account);
+      open_auth_url (account, parent);
       if (twitpic_account_enter_pin (account, parent))
         {
           return SHARING_EDIT_ACCOUNT_SUCCESS;

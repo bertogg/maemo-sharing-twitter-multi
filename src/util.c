@@ -342,24 +342,57 @@ get_twitter_request_token               (gchar **token,
   return (*token != NULL);
 }
 
-gchar *
-twitter_get_auth_url                    (SharingAccount *account)
+typedef struct {
+  SharingAccount *account;
+  gchar *token;
+  gchar *secret;
+  TwitterGetAuthUrlCb callback;
+  gpointer cbdata;
+} TwitterGetAuthUrlData;
+
+static gboolean
+twitter_get_auth_url_idle               (gpointer data)
 {
-  gchar *token, *secret;
+  TwitterGetAuthUrlData *d = data;
   gchar *url = NULL;
-
-  g_return_val_if_fail (account != NULL, NULL);
-
-  if (get_twitter_request_token (&token, &secret))
+  if (d->token)
     {
-      url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", token, NULL);
-      sharing_account_set_param (account, PARAM_REQUEST_TOKEN, token);
-      sharing_account_set_param (account, PARAM_REQUEST_SECRET, secret);
-      g_free (token);
-      g_free (secret);
+      url = g_strconcat (TWITTER_AUTHORIZE_URL, "?oauth_token=", d->token, NULL);
+      sharing_account_set_param (d->account, PARAM_REQUEST_TOKEN, d->token);
+      sharing_account_set_param (d->account, PARAM_REQUEST_SECRET, d->secret);
     }
+  d->callback (url, d->cbdata);
+  g_free (url);
+  g_free (d->token);
+  g_free (d->secret);
+  g_slice_free (TwitterGetAuthUrlData, d);
+  return FALSE;
+}
 
-  return url;
+static gpointer
+twitter_get_auth_url_thread             (gpointer data)
+{
+  TwitterGetAuthUrlData *d = data;
+  get_twitter_request_token (&(d->token), &(d->secret));
+  gdk_threads_add_idle (twitter_get_auth_url_idle, d);
+  return NULL;
+}
+
+void
+twitter_get_auth_url                    (SharingAccount      *account,
+                                         TwitterGetAuthUrlCb  callback,
+                                         gpointer             cbdata)
+{
+  TwitterGetAuthUrlData *d;
+
+  g_return_if_fail (account != NULL && callback != NULL);
+
+  d = g_slice_new0 (TwitterGetAuthUrlData);
+  d->account  = account;
+  d->callback = callback;
+  d->cbdata   = cbdata;
+
+  g_thread_create (twitter_get_auth_url_thread, d, FALSE, NULL);
 }
 
 void
