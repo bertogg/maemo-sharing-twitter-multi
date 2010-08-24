@@ -122,6 +122,18 @@ register_account_clicked                (GtkWidget *button,
                        GTK_RESPONSE_ACCEPT);
 }
 
+static void
+text_changed_cb                         (GObject    *entry,
+                                         GParamSpec *pspec,
+                                         gpointer    data)
+{
+  const gchar *text = gtk_entry_get_text (GTK_ENTRY (entry));
+  while (*text != '\0' && g_ascii_isspace (*text))
+    text++;
+  gtk_dialog_set_response_sensitive (GTK_DIALOG (data), GTK_RESPONSE_ACCEPT,
+                                     *text != '\0');
+}
+
 static gboolean
 twitmulti_account_enter_pin             (SharingAccount *account,
                                          GtkWindow      *parent)
@@ -137,10 +149,13 @@ twitmulti_account_enter_pin             (SharingAccount *account,
   gtk_window_set_title (GTK_WINDOW (d), "Account setup - Twitter PIN number");
   gtk_window_set_transient_for (GTK_WINDOW (d), parent);
   gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_OK, GTK_RESPONSE_ACCEPT);
+  gtk_dialog_set_response_sensitive (GTK_DIALOG (d), GTK_RESPONSE_ACCEPT, FALSE);
 
   label = gtk_label_new ("Enter PIN number:");
   entry = hildon_entry_new (HILDON_SIZE_FINGER_HEIGHT | HILDON_SIZE_AUTO_WIDTH);
   gtk_entry_set_width_chars (GTK_ENTRY (entry), 10);
+
+  g_signal_connect (entry, "notify::text", G_CALLBACK (text_changed_cb), d);
 
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (d)->vbox), hbox);
   gtk_box_pack_start (GTK_BOX (hbox), label, TRUE, TRUE, 0);
