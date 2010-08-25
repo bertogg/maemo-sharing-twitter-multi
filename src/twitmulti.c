@@ -338,12 +338,11 @@ twitmulti_share_file                    (SharingTransfer *transfer,
 
           if (title)
             g_strstrip (title);
-          else
-            title = g_strdup ("Photo: ");
 
           sharing_http_set_progress_callback (http, upload_progress_cb, &data);
           sharing_http_add_req_multipart_file (http, "media", path, mime);
-          sharing_http_add_req_multipart_data (http, "message", title, -1, "text/plain");
+          if (title)
+            sharing_http_add_req_multipart_data (http, "message", title, -1, "text/plain");
 
           switch (service)
             {
@@ -388,7 +387,7 @@ twitmulti_share_file                    (SharingTransfer *transfer,
 
                 if (img_url != NULL)
                   {
-                    gchar *tweet = g_strconcat (title, " ", img_url, NULL);
+                    gchar *tweet = g_strconcat (title ? title : "Photo:", " ", img_url, NULL);
 
                     if (!post_to_twitter || twitter_update_status (tweet, account))
                       sharing_entry_media_set_sent (media, TRUE);
