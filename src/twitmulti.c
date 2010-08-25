@@ -191,10 +191,13 @@ twitmulti_account_setup                 (SharingAccount *account,
   gtk_window_set_title (GTK_WINDOW (d), "Account setup - Twitter");
   gtk_window_set_transient_for (GTK_WINDOW (d), parent);
 
-  label = gtk_label_new ("You need to register a Twitter account using the web page.\n"
-                         "If you don't have one, you'll be offered the option to do it.\n"
-                         "You'll be given a PIN number to continue this setup.");
-  button = gtk_button_new_with_label ("Register Twitter account");
+  label = gtk_label_new ("Open the Twitter web page in the browser using the button below\n"
+                         "and authorize the Nokia N900 to post to your account.\n\n"
+                         "After that, you'll see a PIN number. You have to come back here\n"
+                         "and enter that number to continue this setup process.\n\n"
+                         "If you don't have a Twitter account yet, you'll be offered\n"
+                         "the option to create one.");
+  button = gtk_button_new_with_label ("Open Twitter web page");
 
   hildon_gtk_widget_set_theme_size (button, HILDON_SIZE_FINGER_HEIGHT | HILDON_SIZE_AUTO_WIDTH);
 
@@ -452,9 +455,10 @@ twitmulti_account_edit                  (GtkWindow       *parent,
   gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_REMOVE, RESPONSE_REMOVE);
   gtk_dialog_add_button (GTK_DIALOG (d), GTK_STOCK_EDIT, RESPONSE_EDIT);
 
-  label = gtk_label_new ("Press 'Edit' to open the Twitter web page.\n"
-                         "After that, enter the PIN number here\n"
-                         "to confirm your changes.");
+  label = gtk_label_new ("Press 'Edit' to open the Twitter web page\n"
+                         "and authorize the Nokia N900 again.\n\n"
+                         "After that, you'll see a PIN number.\n"
+                         "Enter the PIN here to confirm your changes.");
 
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (d)->vbox), label);
 
