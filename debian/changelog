@@ -1,3 +1,9 @@
+sharing-twitter-multi (0.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Alberto Garcia <agarcia@igalia.com>  Wed, 25 Aug 2010 17:33:50 +0200
+
 sharing-twitter-multi (0.1-1) unstable; urgency=low
 
   * Initial release
