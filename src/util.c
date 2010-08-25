@@ -236,8 +236,8 @@ get_twitter_request_token_url           (void)
 }
 
 static gchar *
-get_access_token_url                    (gchar *request_token,
-                                         gchar *pin)
+get_access_token_url                    (const gchar *request_token,
+                                         const gchar *pin)
 {
   gchar *timestamp, *nonce, *url;
   g_return_val_if_fail (request_token && pin, NULL);
@@ -262,11 +262,11 @@ get_access_token_url                    (gchar *request_token,
 }
 
 static gboolean
-get_twitter_access_token                (gchar  *request_token,
-                                         gchar  *pin,
-                                         gchar **access_token,
-                                         gchar **access_secret,
-                                         gchar **screen_name)
+get_twitter_access_token                (const gchar  *request_token,
+                                         const gchar  *pin,
+                                         gchar       **access_token,
+                                         gchar       **access_secret,
+                                         gchar       **screen_name)
 {
   gchar *url;
 
