@@ -204,7 +204,7 @@ twitmulti_account_setup                 (SharingAccount *account,
   gtk_container_add (vbox, label);
   gtk_container_add (vbox, button);
 
-  g_signal_connect (button, "clicked", G_CALLBACK (register_account_clicked), account);
+  g_signal_connect (button, "clicked", G_CALLBACK (register_account_clicked), NULL);
 
   gtk_widget_show_all (d);
   response = gtk_dialog_run (GTK_DIALOG (d));
