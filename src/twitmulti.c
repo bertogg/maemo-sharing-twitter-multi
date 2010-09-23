@@ -21,6 +21,7 @@
 
 #include <hildon-mime.h>
 #include <sharing-http.h>
+#include <sharing-tag.h>
 #include <libxml/parser.h>
 
 #define TWITPIC_API_KEY                 "1f9ce28260728df0a40cafe3506a9407"
@@ -341,6 +342,26 @@ twitmulti_share_file                    (SharingTransfer *transfer,
 
           if (title)
             g_strstrip (title);
+
+          /* We support Mobypicture tags */
+          if (service == SERVICE_MOBYPICTURE)
+            {
+              const GSList *taglist = sharing_entry_media_get_tags (media);
+              if (taglist != NULL)
+                {
+                  GString *tags = g_string_sized_new (100);
+                  while (taglist != NULL)
+                    {
+                      SharingTag *tag = (SharingTag *) taglist->data;
+                      g_string_append (tags, sharing_tag_get_word (tag));
+                      taglist = taglist->next;
+                      if (taglist != NULL)
+                        g_string_append_c (tags, ',');
+                    }
+                  sharing_http_add_req_multipart_data (http, "tags", tags->str, -1, "text/plain");
+                  g_string_free (tags, TRUE);
+                }
+            }
 
           sharing_http_set_progress_callback (http, upload_progress_cb, &data);
           sharing_http_add_req_multipart_file (http, "media", path, mime);
