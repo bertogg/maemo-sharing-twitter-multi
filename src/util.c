@@ -492,11 +492,12 @@ twitter_account_validate                (SharingAccount *account)
 }
 
 gchar *
-twitter_get_verify_credentials_header   (SharingAccount *account)
+twitter_get_verify_credentials_header   (SharingAccount *account,
+                                         const gchar    *verify_url)
 {
   gchar *token, *secret, *hdr = NULL;
 
-  g_return_val_if_fail (account != NULL, NULL);
+  g_return_val_if_fail (account != NULL && verify_url != NULL, NULL);
 
   token = sharing_account_get_param (account, PARAM_ACCESS_TOKEN);
   secret = sharing_account_get_param (account, PARAM_ACCESS_SECRET);
@@ -508,7 +509,7 @@ twitter_get_verify_credentials_header   (SharingAccount *account)
       timestamp = g_strdup_printf ("%lu", time (NULL));
       nonce = oauth_gen_nonce ();
 
-      sig = get_oauth_signature ("GET", TWITTER_VERIFY_CREDENTIALS_URL, secret,
+      sig = get_oauth_signature ("GET", verify_url, secret,
                                  "oauth_consumer_key", CONSUMER_KEY,
                                  "oauth_nonce", nonce,
                                  "oauth_signature_method", "HMAC-SHA1",

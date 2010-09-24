@@ -325,6 +325,7 @@ twitmulti_share_file                    (SharingTransfer *transfer,
       else
         {
           const gchar *posturl;
+          const gchar *verify_url = TWITTER_VERIFY_CREDENTIALS_JSON;
           gchar *hdr, *title;
           SharingHTTP *http = sharing_http_new ();
           SharingHTTPRunResponse httpret;
@@ -391,11 +392,11 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               g_return_val_if_reached (SHARING_SEND_ERROR_UNKNOWN);
             }
 
-          hdr = twitter_get_verify_credentials_header (account);
+          hdr = twitter_get_verify_credentials_header (account, verify_url);
           sharing_http_add_req_header_line (http, hdr);
           g_free (hdr);
 
-          sharing_http_add_req_header_line (http, "X-Auth-Service-Provider: " TWITTER_VERIFY_CREDENTIALS_URL);
+          sharing_http_add_req_header (http, "X-Auth-Service-Provider", verify_url);
           httpret = sharing_http_run (http, posturl);
 
           switch (httpret)

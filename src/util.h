@@ -29,7 +29,8 @@ G_BEGIN_DECLS
 #define TWITTER_REQUEST_TOKEN_URL       "https://api.twitter.com/oauth/request_token"
 #define TWITTER_AUTHORIZE_URL           "https://api.twitter.com/oauth/authorize"
 #define TWITTER_UPDATE_STATUS_URL       "https://api.twitter.com/1/statuses/update.xml"
-#define TWITTER_VERIFY_CREDENTIALS_URL  "https://api.twitter.com/1/account/verify_credentials.json"
+#define TWITTER_VERIFY_CREDENTIALS_XML  "https://api.twitter.com/1/account/verify_credentials.xml"
+#define TWITTER_VERIFY_CREDENTIALS_JSON "https://api.twitter.com/1/account/verify_credentials.json"
 
 typedef void
 (*TwitterGetAuthUrlCb)                  (const gchar *url,
@@ -49,7 +50,8 @@ twitter_account_set_pin                 (SharingAccount *account,
                                          const gchar    *pin);
 
 gchar *
-twitter_get_verify_credentials_header   (SharingAccount *account);
+twitter_get_verify_credentials_header   (SharingAccount *account,
+                                         const gchar    *verify_url);
 
 gboolean
 twitter_update_status                   (const gchar    *status,
