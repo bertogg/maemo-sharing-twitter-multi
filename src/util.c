@@ -509,7 +509,6 @@ twitter_get_verify_credentials_header   (SharingAccount *account)
       nonce = oauth_gen_nonce ();
 
       sig = get_oauth_signature ("GET", TWITTER_VERIFY_CREDENTIALS_URL, secret,
-                                 "oauth_callback", "oob",
                                  "oauth_consumer_key", CONSUMER_KEY,
                                  "oauth_nonce", nonce,
                                  "oauth_signature_method", "HMAC-SHA1",
@@ -519,7 +518,6 @@ twitter_get_verify_credentials_header   (SharingAccount *account)
                                  NULL);
 
       hdr = g_strconcat ("X-Verify-Credentials-Authorization: OAuth realm=\"http://api.twitter.com/\", "
-                         "oauth_callback=\"oob\", "
                          "oauth_consumer_key=\"" CONSUMER_KEY "\", "
                          "oauth_nonce=\"", nonce, "\", "
                          "oauth_signature_method=\"HMAC-SHA1\", "
