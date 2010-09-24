@@ -15,6 +15,7 @@
         <value id="mobypicture" key="Mobypicture"/>
         <value id="imgly" key="img.ly"/>
         <value id="posterous" key="Posterous"/>
+        <value id="yfrog" key="yfrog"/>
       </option>
       <option id="posttotwitter" type="enumeration" default="yes">
         <caption key="Post link to Twitter?"/>

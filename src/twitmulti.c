@@ -26,6 +26,7 @@
 
 #define TWITPIC_API_KEY                 "1f9ce28260728df0a40cafe3506a9407"
 #define MOBYPICTURE_API_KEY             "L5RL7tAoAAsgZqKP"
+#define YFROG_API_KEY                   "45ENOPRS1f5a98c9f89b523a8465d2a3ad0602a3"
 
 static gchar *
 parse_server_response                   (const gchar       *response,
@@ -48,6 +49,7 @@ parse_server_response                   (const gchar       *response,
       break;
     case SERVICE_MOBYPICTURE:
     case SERVICE_TWITGOO:
+    case SERVICE_YFROG:
       rootid = "rsp";
       urlid  = "mediaurl";
       break;
@@ -268,6 +270,8 @@ get_twitter_pic_service                 (SharingEntry *entry)
         service = SERVICE_IMGLY;
       else if (g_str_equal (servicename, "posterous"))
         service = SERVICE_POSTEROUS;
+      else if (g_str_equal (servicename, "yfrog"))
+        service = SERVICE_YFROG;
     }
 
   return service;
@@ -387,6 +391,11 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               break;
             case SERVICE_POSTEROUS:
               posturl = "https://posterous.com/api2/upload.xml";
+              break;
+            case SERVICE_YFROG:
+              sharing_http_add_req_multipart_data (http, "key", YFROG_API_KEY, -1, "text/plain");
+              posturl = "https://yfrog.com/api/xauth_upload";
+              verify_url = TWITTER_VERIFY_CREDENTIALS_XML;
               break;
             default:
               g_return_val_if_reached (SHARING_SEND_ERROR_UNKNOWN);
