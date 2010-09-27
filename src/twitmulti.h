@@ -25,12 +25,12 @@
 G_BEGIN_DECLS
 
 typedef enum {
-  SERVICE_TWITPIC,
-  SERVICE_MOBYPICTURE,
-  SERVICE_IMGLY,
-  SERVICE_POSTEROUS,
-  SERVICE_YFROG,
-  SERVICE_TWITGOO
+  SERVICE_TWITPIC,        /* http://dev.twitpic.com/docs/2/upload/                             */
+  SERVICE_MOBYPICTURE,    /* http://developers.mobypicture.com/documentation/2-0/upload/       */
+  SERVICE_IMGLY,          /* http://img.ly/api/docs                                            */
+  SERVICE_POSTEROUS,      /* http://posterous.com/api/twitter                                  */
+  SERVICE_YFROG,          /* http://code.google.com/p/imageshackapi/wiki/TwitterAuthentication */
+  SERVICE_TWITGOO         /* http://twitgoo.com/docs/Content/Developer/upload.htm              */
 } TwitterPicService;
 
 gboolean
