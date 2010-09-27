@@ -28,6 +28,9 @@
 #define MOBYPICTURE_API_KEY             "L5RL7tAoAAsgZqKP"
 #define YFROG_API_KEY                   "45ENOPRS1f5a98c9f89b523a8465d2a3ad0602a3"
 
+#define APP_NAME                        "Nokia N900"
+#define APP_URL                         "http://maemo.org/downloads/product/Maemo5/sharing-twitter-multi/"
+
 static gchar *
 parse_server_response                   (const gchar       *response,
                                          gsize              size,
@@ -397,6 +400,10 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               posturl = "http://img.ly/api/2/upload.xml";
               break;
             case SERVICE_POSTEROUS:
+              if (description)
+                sharing_http_add_req_multipart_data (http, "body", description, -1, "text/plain");
+              sharing_http_add_req_multipart_data (http, "source", APP_NAME, -1, "text/plain");
+              sharing_http_add_req_multipart_data (http, "sourceLink", APP_URL, -1, "text/plain");
               posturl = "https://posterous.com/api2/upload.xml";
               break;
             case SERVICE_YFROG:
