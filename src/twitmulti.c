@@ -331,6 +331,7 @@ twitmulti_share_file                    (SharingTransfer *transfer,
           const gchar *posturl;
           const gchar *verify_url = TWITTER_VERIFY_CREDENTIALS_JSON;
           gchar *hdr, *title;
+          const gchar *description;
           SharingHTTP *http = sharing_http_new ();
           SharingHTTPRunResponse httpret;
           UploadProgressData data;
@@ -340,13 +341,17 @@ twitmulti_share_file                    (SharingTransfer *transfer,
           data.size = sharing_entry_media_get_size (media);
 
           title = sharing_entry_media_get_title (media);
-
-          /* If the title field is empty, use the description instead */
-          if (!title)
-            title = g_strdup (sharing_entry_media_get_desc (media));
+          description = sharing_entry_media_get_desc (media);
 
           if (title)
-            g_strstrip (title);
+            {
+              g_strstrip (title);
+            }
+          else if (description)
+            {
+              /* If the title field is empty, use the description instead */
+              title = g_strstrip (g_strdup (description));
+            }
 
           /* We support Mobypicture tags */
           if (service == SERVICE_MOBYPICTURE)
@@ -380,6 +385,8 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               posturl = "http://api.twitpic.com/2/upload.xml";
               break;
             case SERVICE_MOBYPICTURE:
+              if (description)
+                sharing_http_add_req_multipart_data (http, "description", description, -1, "text/plain");
               sharing_http_add_req_multipart_data (http, "key", MOBYPICTURE_API_KEY, -1, "text/plain");
               posturl = "https://api.mobypicture.com/2.0/upload.xml";
               break;
