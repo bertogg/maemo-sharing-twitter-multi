@@ -1,3 +1,10 @@
+sharing-twitter-multi (0.4-1) unstable; urgency=low
+
+  * Add description support for Mobypicture and Posterous
+  * Set source app name and URL in Posterous
+
+ -- Alberto Garcia <agarcia@igalia.com>  Thu, 30 Sep 2010 19:12:54 +0200
+
 sharing-twitter-multi (0.3-1) unstable; urgency=low
 
   * New upstream release

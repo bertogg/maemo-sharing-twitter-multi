@@ -2,7 +2,7 @@
 ### Initialization and basic checks ###
 #######################################
 AC_INIT(Makefile.am)
-AM_INIT_AUTOMAKE(sharing-twitter-multi, 0.3)
+AM_INIT_AUTOMAKE(sharing-twitter-multi, 0.4)
 AM_CONFIG_HEADER(config.h)
 AC_PROG_CC
 AC_PROG_CPP
