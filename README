@@ -5,6 +5,7 @@ This is a Twitter picture sharing plugin for the Nokia N900.
 
 It currently supports the following services:
 
+   * Twitter
    * Twitpic
    * Twitgoo
    * Mobypicture
@@ -12,7 +13,7 @@ It currently supports the following services:
    * Posterous
    * yfrog
 
-(C) 2010 Igalia, S.L.
+(C) 2010-2011 Igalia, S.L.
 
 This library is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License version 3

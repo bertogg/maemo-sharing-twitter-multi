@@ -1,3 +1,9 @@
+sharing-twitter-multi (0.5-1) unstable; urgency=low
+
+  * Support uploading images directly to Twitter.
+
+ -- Alberto Garcia <agarcia@igalia.com>  Sun, 23 Oct 2011 11:52:00 +0300
+
 sharing-twitter-multi (0.4-1) unstable; urgency=low
 
   * Add description support for Mobypicture and Posterous

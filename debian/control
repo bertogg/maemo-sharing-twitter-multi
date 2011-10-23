@@ -14,8 +14,8 @@ XB-Maemo-Display-Name: Sharing plugin for Twitter
 Description: Upload photos to Twitter using a variety of services
  This plugin allows you to upload pictures to Twitter using the
  sharing service of the Nokia N900.
- It currently supports Twitpic, Twitgoo, Mobypicture, img.ly,
- Posterous and yfrog
+ It can upload directly to Twitter but it also supports Twitpic,
+ Twitgoo, Mobypicture, img.ly, Posterous and yfrog.
 XB-Maemo-Icon-26:
  iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A
  /wD/oL2nkwAAAAlwSFlzAAALEgAACxIB0t1+/AAAAAd0SU1FB9oIFxEvMdzpQB4AAAX2SURBVGje
