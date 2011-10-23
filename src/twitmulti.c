@@ -1,7 +1,7 @@
 /*
  * This file is part of sharing-twitter-multi
  *
- * Copyright (C) 2010 Igalia, S.L.
+ * Copyright (C) 2010-2011 Igalia, S.L.
  * Authors: Alberto Garcia <agarcia@igalia.com>
  *
  * This library is free software: you can redistribute it and/or
@@ -20,7 +20,6 @@
 #include "util.h"
 
 #include <hildon-mime.h>
-#include <sharing-http.h>
 #include <sharing-tag.h>
 #include <libxml/parser.h>
 
@@ -236,26 +235,6 @@ twitmulti_account_validate              (SharingAccount *account,
   return twitter_account_validate (account);
 }
 
-typedef struct {
-  SharingTransfer *transfer;
-  gboolean        *dead_mans_switch;
-  guint64          size;
-} UploadProgressData;
-
-static gboolean
-upload_progress_cb                      (SharingHTTP *http,
-                                         guint64      bytes_sent,
-                                         gpointer     user_data)
-{
-  UploadProgressData *data = user_data;
-  gdouble progress = 0.0;
-  *(data->dead_mans_switch) = FALSE;
-  if (data->size > 0)
-    progress = (gdouble) bytes_sent / data->size;
-  sharing_transfer_set_progress (data->transfer, CLAMP (progress, 0.0, 1.0));
-  return TRUE;
-}
-
 TwitterPicService
 get_twitter_pic_service                 (SharingEntry *entry)
 {
@@ -267,6 +246,8 @@ get_twitter_pic_service                 (SharingEntry *entry)
     {
       if (g_str_equal (servicename, "twitgoo"))
         service = SERVICE_TWITGOO;
+      else if (g_str_equal (servicename, "twitter"))
+        service = SERVICE_TWITTER;
       else if (g_str_equal (servicename, "mobypicture"))
         service = SERVICE_MOBYPICTURE;
       else if (g_str_equal (servicename, "imgly"))
@@ -335,7 +316,7 @@ twitmulti_share_file                    (SharingTransfer *transfer,
           const gchar *verify_url = TWITTER_VERIFY_CREDENTIALS_JSON;
           gchar *hdr, *title;
           const gchar *description;
-          SharingHTTP *http = sharing_http_new ();
+          SharingHTTP *http = NULL;
           SharingHTTPRunResponse httpret;
           UploadProgressData data;
 
@@ -355,6 +336,27 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               /* If the title field is empty, use the description instead */
               title = g_strstrip (g_strdup (description));
             }
+
+          if (service == SERVICE_TWITTER)
+            {
+              switch (twitter_update_status (title ? title : "Photo: ", account, path, mime, &data))
+                {
+                case SHARING_HTTP_RUNRES_SUCCESS:
+                  sharing_entry_media_set_sent (media, TRUE);
+                  break;
+                case SHARING_HTTP_RUNRES_CANCELLED:
+                  retval = SHARING_SEND_CANCELLED;
+                  break;
+                case SHARING_HTTP_RUNRES_CONNECTION_PROBLEM:
+                  retval = SHARING_SEND_ERROR_CONNECTION;
+                  break;
+                default:
+                  retval = SHARING_SEND_ERROR_UNKNOWN;
+                }
+              goto cleanup;
+            }
+
+          http = sharing_http_new ();
 
           /* We support Mobypicture tags */
           if (service == SERVICE_MOBYPICTURE)
@@ -435,9 +437,13 @@ twitmulti_share_file                    (SharingTransfer *transfer,
 
                 if (img_url != NULL)
                   {
+                    SharingHTTPRunResponse response = SHARING_HTTP_RUNRES_SUCCESS;
                     gchar *tweet = g_strconcat (title ? title : "Photo:", " ", img_url, NULL);
 
-                    if (!post_to_twitter || twitter_update_status (tweet, account))
+                    if (post_to_twitter)
+                      response = twitter_update_status (tweet, account, NULL, NULL, NULL);
+
+                    if (response == SHARING_HTTP_RUNRES_SUCCESS)
                       sharing_entry_media_set_sent (media, TRUE);
 
                     g_free (img_url);
@@ -459,7 +465,10 @@ twitmulti_share_file                    (SharingTransfer *transfer,
               retval = SHARING_SEND_ERROR_UNKNOWN;
             }
 
-          sharing_http_unref (http);
+        cleanup:
+
+          if (http)
+            sharing_http_unref (http);
           g_free (title);
         }
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of sharing-twitter-multi
  *
- * Copyright (C) 2010 Igalia, S.L.
+ * Copyright (C) 2010-2011 Igalia, S.L.
  * Authors: Alberto Garcia <agarcia@igalia.com>
  *
  * This library is free software: you can redistribute it and/or
@@ -21,6 +21,7 @@
 
 #include <glib.h>
 #include <sharing-plugin-interface.h>
+#include <sharing-http.h>
 #include <conicconnection.h>
 
 G_BEGIN_DECLS
@@ -29,12 +30,24 @@ G_BEGIN_DECLS
 #define TWITTER_REQUEST_TOKEN_URL       "https://api.twitter.com/oauth/request_token"
 #define TWITTER_AUTHORIZE_URL           "https://api.twitter.com/oauth/authorize"
 #define TWITTER_UPDATE_STATUS_URL       "https://api.twitter.com/1/statuses/update.xml"
+#define TWITTER_UPDATE_MEDIA_STATUS_URL "https://upload.twitter.com/1/statuses/update_with_media.xml"
 #define TWITTER_VERIFY_CREDENTIALS_XML  "https://api.twitter.com/1/account/verify_credentials.xml"
 #define TWITTER_VERIFY_CREDENTIALS_JSON "https://api.twitter.com/1/account/verify_credentials.json"
 
 typedef void
 (*TwitterGetAuthUrlCb)                  (const gchar *url,
                                          gpointer     data);
+
+typedef struct {
+  SharingTransfer *transfer;
+  gboolean        *dead_mans_switch;
+  guint64          size;
+}                                       UploadProgressData;
+
+gboolean
+upload_progress_cb                      (SharingHTTP *http,
+                                         guint64      bytes_sent,
+                                         gpointer     user_data);
 
 void
 twitter_get_auth_url                    (SharingAccount      *account,
@@ -53,9 +66,12 @@ gchar *
 twitter_get_verify_credentials_header   (SharingAccount *account,
                                          const gchar    *verify_url);
 
-gboolean
-twitter_update_status                   (const gchar    *status,
-                                         SharingAccount *account);
+SharingHTTPRunResponse
+twitter_update_status                   (const gchar        *status,
+                                         SharingAccount     *account,
+                                         const gchar        *media,
+                                         const gchar        *mime,
+                                         UploadProgressData *progress_data);
 
 G_END_DECLS
 

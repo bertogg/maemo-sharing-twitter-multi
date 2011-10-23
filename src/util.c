@@ -1,7 +1,7 @@
 /*
  * This file is part of sharing-twitter-multi
  *
- * Copyright (C) 2010 Igalia, S.L.
+ * Copyright (C) 2010-2011 Igalia, S.L.
  * Authors: Alberto Garcia <agarcia@igalia.com>
  *
  * This library is free software: you can redistribute it and/or
@@ -20,7 +20,6 @@
 
 #include <oauth.h>
 #include <string.h>
-#include <sharing-http.h>
 #include <conicconnectionevent.h>
 
 #define PARAM_ACCESS_TOKEN        "twitter-access-token"
@@ -31,6 +30,20 @@
 
 #define CONSUMER_KEY              "WmyOdRu3svydhjw2SKgqZA"
 #define CONSUMER_SECRET           "psF3jiC2uMVWG7P1sd2bVEhFmHmWJOUTcbvevqbrcc"
+
+gboolean
+upload_progress_cb                      (SharingHTTP *http,
+                                         guint64      bytes_sent,
+                                         gpointer     user_data)
+{
+  UploadProgressData *data = user_data;
+  gdouble progress = 0.0;
+  *(data->dead_mans_switch) = FALSE;
+  if (data->size > 0)
+    progress = (gdouble) bytes_sent / data->size;
+  sharing_transfer_set_progress (data->transfer, CLAMP (progress, 0.0, 1.0));
+  return TRUE;
+}
 
 static GHashTable *
 parse_reply                             (const gchar *buffer,
@@ -538,28 +551,33 @@ twitter_get_verify_credentials_header   (SharingAccount *account,
   return hdr;
 }
 
-gboolean
-twitter_update_status                   (const gchar    *status,
-                                         SharingAccount *account)
+SharingHTTPRunResponse
+twitter_update_status                   (const gchar        *status,
+                                         SharingAccount     *account,
+                                         const gchar        *media,
+                                         const gchar        *mime,
+                                         UploadProgressData *progress_data)
 {
   gchar *token, *secret;
-  gboolean retvalue = FALSE;
+  SharingHTTPRunResponse retvalue = SHARING_SEND_ERROR_UNKNOWN;
+  const gchar *post_url;
 
   g_return_val_if_fail (status && account, FALSE);
+  g_return_val_if_fail (!media || (mime && progress_data), FALSE);
 
   token = sharing_account_get_param (account, PARAM_ACCESS_TOKEN);
   secret = sharing_account_get_param (account, PARAM_ACCESS_SECRET);
+  post_url = (media == NULL) ? TWITTER_UPDATE_STATUS_URL : TWITTER_UPDATE_MEDIA_STATUS_URL;
 
   if (token && secret)
     {
       gchar *sig, *hdr, *timestamp, *nonce;
-      SharingHTTPRunResponse httpret;
       SharingHTTP *http;
 
       timestamp = g_strdup_printf ("%lu", time (NULL));
       nonce = oauth_gen_nonce ();
 
-      sig = get_oauth_signature ("POST", TWITTER_UPDATE_STATUS_URL, secret,
+      sig = get_oauth_signature ("POST", post_url, secret,
                                  "oauth_callback", "oob",
                                  "oauth_consumer_key", CONSUMER_KEY,
                                  "oauth_nonce", nonce,
@@ -582,10 +600,15 @@ twitter_update_status                   (const gchar    *status,
       sharing_http_add_req_multipart_data (http, "status", status, -1, "text/plain");
       sharing_http_add_req_header (http, "Authorization", hdr);
       sharing_http_add_req_header (http, "Expect", "");
-      httpret = sharing_http_run (http, TWITTER_UPDATE_STATUS_URL);
-      sharing_http_unref (http);
 
-      retvalue = (httpret == SHARING_HTTP_RUNRES_SUCCESS);
+      if (media != NULL)
+        {
+          sharing_http_add_req_multipart_file (http, "media[]", media, mime);
+          sharing_http_set_progress_callback (http, upload_progress_cb, progress_data);
+        }
+
+      retvalue = sharing_http_run (http, post_url);
+      sharing_http_unref (http);
 
       g_free (sig);
       g_free (hdr);

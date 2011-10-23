@@ -1,7 +1,7 @@
 /*
  * This file is part of sharing-twitter-multi
  *
- * Copyright (C) 2010 Igalia, S.L.
+ * Copyright (C) 2010-2011 Igalia, S.L.
  * Authors: Alberto Garcia <agarcia@igalia.com>
  *
  * This library is free software: you can redistribute it and/or
@@ -25,6 +25,7 @@
 G_BEGIN_DECLS
 
 typedef enum {
+  SERVICE_TWITTER,        /* http://dev.twitter.com/docs/api/1/post/statuses/update_with_media */
   SERVICE_TWITPIC,        /* http://dev.twitpic.com/docs/2/upload/                             */
   SERVICE_MOBYPICTURE,    /* http://developers.mobypicture.com/documentation/2-0/upload/       */
   SERVICE_IMGLY,          /* http://img.ly/api/docs                                            */

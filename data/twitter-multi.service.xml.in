@@ -8,8 +8,9 @@
     <icon type="post">@servicesdir@/twitter-multi.png</icon>
     <icon type="setup">@servicesdir@/twitter-multi.png</icon>
     <options>
-      <option id="service" type="enumeration" default="twitpic">
+      <option id="service" type="enumeration" default="twitter">
         <caption key="Service"/>
+        <value id="twitter" key="Twitter"/>
         <value id="twitpic" key="Twitpic"/>
         <value id="twitgoo" key="Twitgoo"/>
         <value id="mobypicture" key="Mobypicture"/>
