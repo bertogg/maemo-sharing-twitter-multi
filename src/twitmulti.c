@@ -50,7 +50,6 @@ parse_server_response                   (const gchar       *response,
       urlid  = "url";
       break;
     case SERVICE_MOBYPICTURE:
-    case SERVICE_TWITGOO:
     case SERVICE_YFROG:
       rootid = "rsp";
       urlid  = "mediaurl";
@@ -244,9 +243,7 @@ get_twitter_pic_service                 (SharingEntry *entry)
   servicename = sharing_entry_get_option (entry, "service");
   if (servicename)
     {
-      if (g_str_equal (servicename, "twitgoo"))
-        service = SERVICE_TWITGOO;
-      else if (g_str_equal (servicename, "twitter"))
+      if (g_str_equal (servicename, "twitter"))
         service = SERVICE_TWITTER;
       else if (g_str_equal (servicename, "mobypicture"))
         service = SERVICE_MOBYPICTURE;
@@ -394,9 +391,6 @@ twitmulti_share_file                    (SharingTransfer *transfer,
                 sharing_http_add_req_multipart_data (http, "description", description, -1, "text/plain");
               sharing_http_add_req_multipart_data (http, "key", MOBYPICTURE_API_KEY, -1, "text/plain");
               posturl = "https://api.mobypicture.com/2.0/upload.xml";
-              break;
-            case SERVICE_TWITGOO:
-              posturl = "http://twitgoo.com/api/upload";
               break;
             case SERVICE_IMGLY:
               posturl = "http://img.ly/api/2/upload.xml";

@@ -12,7 +12,6 @@
         <caption key="Service"/>
         <value id="twitter" key="Twitter"/>
         <value id="twitpic" key="Twitpic"/>
-        <value id="twitgoo" key="Twitgoo"/>
         <value id="mobypicture" key="Mobypicture"/>
         <value id="imgly" key="img.ly"/>
         <value id="posterous" key="Posterous"/>
