@@ -66,6 +66,12 @@ parse_server_response                   (const gchar       *response,
         if (xmlStrEqual (iter->name, (xmlChar *) rootid))
           root = iter;
 
+      /* The Mobypicture response includes an extra <media> node */
+      if (root != NULL && service == SERVICE_MOBYPICTURE)
+        for (iter = root->xmlChildrenNode; iter; iter = iter->next)
+          if (xmlStrEqual (iter->name, (xmlChar *) "media"))
+            root = iter;
+
       if (root != NULL)
         for (iter = root->xmlChildrenNode; iter && !url; iter = iter->next)
           if (xmlStrEqual (iter->name, (xmlChar *) urlid))
