@@ -29,10 +29,10 @@ G_BEGIN_DECLS
 #define TWITTER_ACCESS_TOKEN_URL        "https://api.twitter.com/oauth/access_token"
 #define TWITTER_REQUEST_TOKEN_URL       "https://api.twitter.com/oauth/request_token"
 #define TWITTER_AUTHORIZE_URL           "https://api.twitter.com/oauth/authorize"
-#define TWITTER_UPDATE_STATUS_URL       "https://api.twitter.com/1/statuses/update.xml"
-#define TWITTER_UPDATE_MEDIA_STATUS_URL "https://upload.twitter.com/1/statuses/update_with_media.xml"
-#define TWITTER_VERIFY_CREDENTIALS_XML  "https://api.twitter.com/1/account/verify_credentials.xml"
-#define TWITTER_VERIFY_CREDENTIALS_JSON "https://api.twitter.com/1/account/verify_credentials.json"
+#define TWITTER_UPDATE_STATUS_URL       "https://api.twitter.com/1.1/statuses/update.json"
+#define TWITTER_UPDATE_MEDIA_STATUS_URL "https://api.twitter.com/1.1/statuses/update_with_media.json"
+#define TWITTER_VERIFY_CREDENTIALS_XML  "https://api.twitter.com/1.1/account/verify_credentials.xml"
+#define TWITTER_VERIFY_CREDENTIALS_JSON "https://api.twitter.com/1.1/account/verify_credentials.json"
 
 typedef void
 (*TwitterGetAuthUrlCb)                  (const gchar *url,
