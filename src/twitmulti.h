@@ -31,7 +31,6 @@ typedef enum {
   SERVICE_IMGLY,          /* http://img.ly/api/docs                                            */
   SERVICE_POSTEROUS,      /* http://posterous.com/api/twitter                                  */
   SERVICE_YFROG,          /* http://code.google.com/p/imageshackapi/wiki/TwitterAuthentication */
-  SERVICE_TWITGOO         /* http://twitgoo.com/docs/Content/Developer/upload.htm              */
 } TwitterPicService;
 
 gboolean
