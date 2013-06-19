@@ -1,3 +1,11 @@
+sharing-twitter-multi (0.6-1) unstable; urgency=low
+
+  * Use the version 1.1 of the Twitter API.
+  * Drop support for Twitgoo and Posterious.
+  * Fix Mobypicture support.
+
+ -- Alberto Garcia <agarcia@igalia.com>  Wed, 19 Jun 2013 17:30:10 +0300
+
 sharing-twitter-multi (0.5-1) unstable; urgency=low
 
   * Support uploading images directly to Twitter.
